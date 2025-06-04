@@ -1,0 +1,13 @@
+{
+  "cylinders": [
+    {
+      "code": "83727282",
+      "gasType": "H2",
+      "pressure": 200,
+      "physicalForm": "gas",
+      "entryDate": "2025-06-04T18:03:49.945Z",
+      "status": "active"
+    }
+  ],
+  "history": []
+}

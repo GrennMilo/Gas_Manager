@@ -1,0 +1,56 @@
+/* Basic styles for RMIC Gas Cylinder Management */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+}
+
+.navbar-brand img {
+    height: 40px;
+    width: auto;
+}
+
+.section-card {
+    margin-bottom: 2rem;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.section-card:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.section-header {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.status-badge {
+    font-size: 0.85rem;
+    padding: 0.35rem 0.65rem;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+/* Gas type specific colors */
+.gas-h2 { color: #dc3545; }
+.gas-n2 { color: #0d6efd; }
+.gas-co2 { color: #198754; }
+.gas-nh3 { color: #6f42c1; }
+.gas-n2p { color: #0dcaf0; }
+.gas-air { color: #6c757d; }
+.gas-other { color: #f79443; }
+
+/* Fixed bottom buttons */
+.fixed-bottom {
+    background-color: rgba(248, 249, 250, 0.9);
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
+    border-top: 1px solid #e9ecef;
+} 

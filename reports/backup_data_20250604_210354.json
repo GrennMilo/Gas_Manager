@@ -1,0 +1,22 @@
+{
+  "cylinders": [],
+  "history": [
+    {
+      "code": "123123",
+      "gasType": "N2",
+      "pressureIn": "200",
+      "pressureOut": "0",
+      "entryDate": "2025-06-04T19:00:57.252Z",
+      "exitDate": "2025-06-04T19:01:01.843Z"
+    },
+    {
+      "code": "423234234",
+      "gasType": "N2",
+      "pressureIn": "200",
+      "pressureOut": "104",
+      "entryDate": "2025-06-04T19:02:31.080Z",
+      "exitDate": "2025-06-04T19:02:43.399Z"
+    }
+  ],
+  "timestamp": "2025-06-04T19:03:54.055Z"
+}

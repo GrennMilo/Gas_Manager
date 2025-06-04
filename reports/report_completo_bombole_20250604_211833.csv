@@ -1,0 +1,26 @@
+REPORT COMPLETO GESTIONE BOMBOLE
+Data generazione:,04/06/2025 21:18:33
+
+STOCK ATTUALE
+Codice Bombola,Tipo Gas,Pressione (bar),Forma Fisica,Data Ingresso
+
+Totale bombole in stock:,0
+
+RIEPILOGO PER TIPO DI GAS
+Tipo Gas,Quantità
+
+STORICO OPERAZIONI
+Codice Bombola,Tipo Gas,Pressione Ingresso (bar),Pressione Uscita (bar),Data Ingresso,Data Uscita,Consumo (bar),Percentuale Consumo (%)
+123123,N2,200.0,0.0,04/06/2025,04/06/2025,200.0,100.0
+423234234,N2,200.0,104.0,04/06/2025,04/06/2025,96.0,48.0
+23423423444,N2,200.0,55.0,04/06/2025,04/06/2025,145.0,72.5
+23423433,H2,200.0,324.0,04/06/2025,04/06/2025,-124.0,-62.0
+234234234,H2,200.0,0.0,04/06/2025,04/06/2025,200.0,100.0
+234234234,H2,200.0,34.0,04/06/2025,04/06/2025,166.0,83.0
+
+Totale operazioni completate:,6
+
+RIEPILOGO CONSUMO PER TIPO DI GAS
+Tipo Gas,Consumo Totale (bar)
+N2,441.0
+H2,242.0

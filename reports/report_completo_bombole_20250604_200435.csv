@@ -1,0 +1,20 @@
+REPORT COMPLETO GESTIONE BOMBOLE
+Data generazione:,04/06/2025 20:04:35
+
+STOCK ATTUALE
+Codice Bombola,Tipo Gas,Pressione (bar),Forma Fisica,Data Ingresso
+83727282,H2,200,Gas,04/06/2025
+
+Totale bombole in stock:,1
+
+RIEPILOGO PER TIPO DI GAS
+Tipo Gas,Quantità
+H2,1
+
+STORICO OPERAZIONI
+Codice Bombola,Tipo Gas,Pressione Ingresso (bar),Pressione Uscita (bar),Data Ingresso,Data Uscita,Consumo (bar),Percentuale Consumo (%)
+
+Totale operazioni completate:,0
+
+RIEPILOGO CONSUMO PER TIPO DI GAS
+Tipo Gas,Consumo Totale (bar)

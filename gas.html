@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RMIC - Gestione Bombole in Pressione</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Toastify CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <style>
+        .section-card {
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .section-header {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 15px 15px 0 0;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .scanner-container {
+            width: 100%;
+            height: 300px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .scanner-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .scanner-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: flex;
+            gap: 10px;
+        }
+
+        .status-badge {
+            font-size: 0.85rem;
+            padding: 0.35rem 0.65rem;
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .btn-scanner {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-scanner input[type="file"] {
+            position: absolute;
+            top: 0;
+            right: 0;
+            min-width: 100%;
+            min-height: 100%;
+            font-size: 100px;
+            text-align: right;
+            opacity: 0;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .navbar-brand img {
+            height: 40px;
+            width: auto;
+        }
+
+        .preview-container {
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .preview-image {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .ocr-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+        }
+
+        .ocr-result {
+            background: rgba(255, 255, 224, 0.2);
+            border: 1px solid rgba(70, 130, 180, 0.5);
+            padding: 2px;
+            position: absolute;
+            font-family: monospace;
+            font-size: 12px;
+            color: #000;
+        }
+
+        .scan-mode-switch {
+            margin-bottom: 1rem;
+        }
+
+        #progressBar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background-color: #f0f0f0;
+        }
+
+        #progressBar .progress {
+            width: 0%;
+            height: 100%;
+            background-color: #0d6efd;
+            transition: width 0.3s ease;
+        }
+
+        .capture-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container mt-4">
+        <h1 class="mb-4">Ingresso Bombole</h1>
+
+        <div class="card section-card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="scanner-container mb-3" id="scannerContainer">
+                            <video id="video" style="width: 100%; height: 100%; object-fit: cover;"></video>
+                            <canvas id="canvas" style="display: none;"></canvas>
+                            <div class="scanner-controls">
+                                <button class="btn btn-secondary me-2" id="togglePreviewBtn">
+                                    <i class="fas fa-eye"></i> Mostra Preview
+                                </button>
+                                <button class="btn btn-primary" id="captureBtn">
+                                    <i class="fas fa-camera me-2"></i>Cattura
+                                </button>
+                            </div>
+                            <div id="progressBar">
+                                <div class="progress"></div>
+                            </div>
+                        </div>
+
+                        <div class="preview-container mb-3" id="previewContainer" style="display: none;">
+                            <img id="previewImage" class="preview-image">
+                            <div class="ocr-overlay" id="ocrOverlay"></div>
+                        </div>
+
+                        <!-- Container per i form delle bombole -->
+                        <div id="cylinderFormsContainer"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <form id="cylinderForm">
+                            <div class="mb-3">
+                                <label class="form-label" for="cylinderCode">Codice Bombola</label>
+                                <input type="text" class="form-control" id="cylinderCode" required placeholder="Inserisci il codice bombola" aria-label="Codice Bombola">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="gasType">Tipo di Gas</label>
+                                <select class="form-select" id="gasType" required aria-label="Seleziona tipo di gas" title="Tipo di gas">
+                                    <option value="">Seleziona...</option>
+                                    <option value="H2">H2</option>
+                                    <option value="N2">N2</option>
+                                    <option value="CO2">CO2</option>
+                                    <option value="NH3">NH3</option>
+                                    <option value="N2p">N2p.</option>
+                                    <option value="Air">Air</option>
+                                    <option value="other">Altro</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="pressure">Pressione (bar)</label>
+                                <input type="number" class="form-control" id="pressure" value="200" min="0" required placeholder="Inserisci la pressione in bar" aria-label="Pressione in bar">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="physicalForm">Forma Fisica</label>
+                                <select class="form-select" id="physicalForm" required aria-label="Seleziona forma fisica" title="Forma fisica del gas">
+                                    <option value="gas">Gas</option>
+                                    <option value="liquid">Liquido</option>
+                                    <option value="liquidWithDip">Liquido con pescante</option>
+                                </select>
+                            </div>
+                            <button type="button" class="btn btn-success" onclick="gasManager.addCylinder()">
+                                <i class="fas fa-plus me-2"></i>Aggiungi a Stock
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sezione Stock -->
+        <div class="card section-card">
+            <div class="section-header">
+                <h3 class="card-title mb-3">
+                    <i class="fas fa-boxes text-primary me-2"></i>Stock Attuale
+                </h3>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <div class="input-group">
+                            <span class="input-group-text">Gas</span>
+                            <select class="form-select" id="stockGasFilter" aria-label="Filtra per tipo di gas" title="Filtra per tipo di gas">
+                                <option value="">Tutti</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="input-group">
+                            <span class="input-group-text">Forma</span>
+                            <select class="form-select" id="stockFormFilter" aria-label="Filtra per forma fisica" title="Filtra per forma fisica">
+                                <option value="">Tutte</option>
+                                <option value="gas">Gas</option>
+                                <option value="liquid">Liquido</option>
+                                <option value="liquidWithDip">Con pescante</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="input-group">
+                            <span class="input-group-text">Ordina</span>
+                            <select class="form-select" id="stockSort" aria-label="Ordina per" title="Ordina per">
+                                <option value="date">Data</option>
+                                <option value="code">Codice</option>
+                                <option value="gas">Gas</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary flex-grow-1" onclick="gasManager.applyStockFilters()">
+                                <i class="fas fa-filter me-2"></i>Filtra
+                            </button>
+                            <button class="btn btn-success" onclick="gasManager.exportStock()" title="Esporta stock attuale">
+                                <i class="fas fa-file-export"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Codice</th>
+                                <th>Gas</th>
+                                <th>Pressione (bar)</th>
+                                <th>Forma Fisica</th>
+                                <th>Data Ingresso</th>
+                                <th>Azioni</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stockTable">
+                            <!-- Lo stock verrà inserito qui -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sezione Uscita Bombole -->
+        <div class="card section-card">
+            <div class="section-header">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-sign-out-alt text-danger me-2"></i>Uscita Bombole
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="scanner-container mb-3" id="returnScannerContainer">
+                            <video id="returnVideo" style="width: 100%; height: 100%; object-fit: cover;"></video>
+                            <canvas id="returnCanvas" style="display: none;"></canvas>
+                            <div class="scanner-controls">
+                                <button class="btn btn-secondary me-2" id="returnTogglePreviewBtn">
+                                    <i class="fas fa-camera"></i> Abilita Fotocamera
+                            </button>
+                                <button class="btn btn-primary" id="returnCaptureBtn">
+                                    <i class="fas fa-camera me-2"></i>Cattura
+                            </button>
+                            </div>
+                            <div id="returnProgressBar">
+                                <div class="progress"></div>
+                            </div>
+                        </div>
+
+                        <!-- Container per i form di restituzione da OCR -->
+                        <div id="returnFormsContainer"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <!-- Form manuale per la restituzione -->
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Restituzione Manuale</h5>
+                                <form id="manualReturnForm">
+                            <div class="mb-3">
+                                <label class="form-label" for="manualReturnCode">Codice Bombola</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="manualReturnCode" required 
+                                                   placeholder="Inserisci il codice bombola" aria-label="Codice bombola">
+                                            <button class="btn btn-outline-secondary" type="button" 
+                                                    onclick="gasManager.checkCylinderCode()" title="Cerca bombola">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label" for="manualReturnGasType">Tipo di Gas</label>
+                                        <input type="text" class="form-control" id="manualReturnGasType" readonly
+                                              title="Tipo di gas" aria-label="Tipo di gas" placeholder="Tipo di gas">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label" for="manualReturnPressureIn">Pressione Originale (bar)</label>
+                                        <input type="number" class="form-control" id="manualReturnPressureIn" readonly
+                                              title="Pressione originale" aria-label="Pressione originale" placeholder="Pressione originale">
+                            </div>
+                            <div class="mb-3">
+                                        <label class="form-label" for="manualReturnPressureOut">Pressione Residua (bar)</label>
+                                        <input type="number" class="form-control" id="manualReturnPressureOut" required 
+                                              min="0" value="0" title="Pressione residua" aria-label="Pressione residua" placeholder="Pressione residua">
+                            </div>
+                                    <button type="button" class="btn btn-danger w-100" onclick="gasManager.returnCylinderManual()">
+                                <i class="fas fa-undo me-2"></i>Restituisci Bombola
+                            </button>
+                        </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sezione Storico -->
+        <div class="card section-card">
+            <div class="section-header">
+                <h3 class="card-title mb-3">
+                    <i class="fas fa-history text-info me-2"></i>Storico Operazioni
+                </h3>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <div class="input-group">
+                            <span class="input-group-text">Data</span>
+                            <input type="date" class="form-control" id="historyDateFilter" 
+                                  aria-label="Filtra per data" title="Filtra per data" placeholder="Seleziona data">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="input-group">
+                            <span class="input-group-text">Gas</span>
+                            <select class="form-select" id="historyGasFilter" aria-label="Filtra per gas" title="Filtra per gas">
+                                <option value="">Tutti</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="input-group">
+                            <span class="input-group-text">Ordina</span>
+                            <select class="form-select" id="historySort" aria-label="Ordina per" title="Ordina per">
+                                <option value="dateIn">Data Ingresso</option>
+                                <option value="dateOut">Data Uscita</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary flex-grow-1" onclick="gasManager.applyHistoryFilters()">
+                                <i class="fas fa-filter me-2"></i>Filtra
+                            </button>
+                            <button class="btn btn-success" onclick="gasManager.exportHistory()" title="Esporta storico">
+                                <i class="fas fa-file-export"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Codice</th>
+                                <th>Gas</th>
+                                <th>Pressione In</th>
+                                <th>Pressione Out</th>
+                                <th>Data Ingresso</th>
+                                <th>Data Uscita</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTable">
+                            <!-- Lo storico verrà inserito qui -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aggiungi un nuovo pulsante per il report completo nella navbar -->
+    <div class="fixed-bottom p-3 text-end">
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="gasManager.exportAll()" title="Genera report completo">
+                <i class="fas fa-file-csv me-2"></i>Report Completo
+            </button>
+            <button class="btn btn-secondary" onclick="gasManager.backupToServer()" title="Backup dati">
+                <i class="fas fa-cloud-upload-alt me-2"></i>Backup
+            </button>
+        </div>
+    </div>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Toastify JS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <!-- QR Scanner -->
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode/html5-qrcode.min.js"></script>
+    <!-- Tesseract.js -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.3/dist/tesseract.min.js"></script>
+    <!-- XLSX -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <!-- App JS -->
+    <script src="gas_manager.js"></script>
+</body>
+</html> 
