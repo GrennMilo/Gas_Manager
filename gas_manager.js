@@ -417,20 +417,20 @@ const gasManager = {
         // Array to collect all potential matches
         let allMatches = [];
         
-        // Step 1: Look for codes with hyphens at the 7th position (format: 756311-123456)
-        const hyphenPattern = /7563\d{2}\-\d+/g;
+        // Step 1: Look for codes with standard format: 756311-xxxxxxxx
+        // This handles the hyphen format that's commonly used
+        const hyphenPattern = /756311[\s\-]?[0-9]{8}/g;
         const hyphenMatches = processedText.match(hyphenPattern) || [];
         
         if (hyphenMatches.length > 0) {
-            console.log('Found hyphenated codes:', hyphenMatches);
+            console.log('Found standard format codes:', hyphenMatches);
             allMatches.push(...hyphenMatches);
         }
         
-        // Step 2: Look for the specific pattern 7563 followed by numbers (with possible OCR errors)
-        // This regex looks for "7563" (or similar patterns) followed by numbers
+        // Step 2: Look for the specific pattern 756311 followed by numbers (with possible OCR errors)
+        // This regex looks for "756311" (or similar patterns) followed by numbers
         // It allows for spaces between digits that might be introduced by OCR
-        // Original: /7563[0-9]+/g
-        const specificRegex = /[7T][ ]?5[ ]?6[ ]?3[ ]?[0-9O0oIl1 ]+/g;
+        const specificRegex = /756311[ ]?[0-9O0oIl1 \-]+/g;
         const specificMatches = processedText.match(specificRegex) || [];
         
         if (specificMatches.length > 0) {
@@ -441,22 +441,20 @@ const gasManager = {
                 return match.replace(/\s+/g, '') // Remove all spaces
                             .replace(/[Oo]/g, '0') // Replace O/o with 0
                             .replace(/[Il]/g, '1') // Replace I/l with 1
-                            .replace(/[T]/g, '7'); // Replace T with 7 (common OCR confusion)
+                            .replace(/\-/g, ''); // Remove all hyphens
             });
             
             allMatches.push(...cleanedMatches);
         }
         
-        // Step 3: Check original text for any numbers that might start with 7563
+        // Step 3: Check original text for any numbers that might start with 756311
         // This is a broader search in case the specific pattern wasn't matched due to OCR errors
-        const anyNumberRegex = /\b\d{4,}\b/g;
+        const anyNumberRegex = /\b\d{6,}\b/g;
         const numberMatches = processedText.match(anyNumberRegex) || [];
         
-        // Filter for numbers that start with 7563 or similar patterns
+        // Filter for numbers that start with 756311 or similar patterns
         const potentialMatches = numberMatches.filter(num => {
-            return num.startsWith('7563') || 
-                   num.startsWith('7S63') ||
-                   num.startsWith('75G3');
+            return num.startsWith('756311');
         });
         
         if (potentialMatches.length > 0) {
@@ -464,12 +462,12 @@ const gasManager = {
             allMatches.push(...potentialMatches);
         }
         
-        // Step 4: Look for any sequence of 4+ digits as a fallback
+        // Step 4: Look for any sequence of digits that might be a cylinder code
         if (allMatches.length === 0) {
             console.log('No specific matches found, falling back to general number detection');
             
-            // Look for 4 or more consecutive digits (standard code length)
-            const genericNumberRegex = /\b\d{4,}\b/g;
+            // Look for long digit sequences that might be codes with the prefix
+            const genericNumberRegex = /\b\d{10,}\b/g;
             const genericMatches = processedText.match(genericNumberRegex) || [];
             
             allMatches.push(...genericMatches);
@@ -477,10 +475,9 @@ const gasManager = {
         
         // Step 5: Advanced pattern detection (for severely distorted OCR)
         // This pattern looks for text that might be a code but with severe OCR issues
-        // For example: "7 5 6 3 1 2 3 4" or "7S63-12345"
         if (allMatches.length === 0) {
             // This regex looks for patterns that might be cylinder codes but with severe distortion
-            const fuzzyRegex = /[7T][ \-_.]*[5S][ \-_.]*[6G][ \-_.]*3[ \-_.]*[\d\s]+/g;
+            const fuzzyRegex = /7[ \-_.]*5[ \-_.]*6[ \-_.]*3[ \-_.]*1[ \-_.]*1[ \-_.]*[\d\s\-_.]+/g;
             const fuzzyMatches = normalizedText.match(fuzzyRegex) || [];
             
             if (fuzzyMatches.length > 0) {
@@ -490,19 +487,10 @@ const gasManager = {
                 const cleanedFuzzyMatches = fuzzyMatches.map(match => {
                     // First replace common OCR errors
                     let cleaned = match.replace(/[Oo]/g, '0') // Replace O/o with 0
-                                      .replace(/[Il]/g, '1')  // Replace I/l with 1
-                                      .replace(/[T]/g, '7')   // Replace T with 7
-                                      .replace(/[S]/g, '5')   // Replace S with 5
-                                      .replace(/[G]/g, '6');  // Replace G with 6
+                                      .replace(/[Il]/g, '1'); // Replace I/l with 1
                     
-                    // Special case: Keep hyphens at position 7 (for format 756311-123456)
-                    if (cleaned.length >= 8 && cleaned.charAt(6) === '-') {
-                        // Keep the hyphen for this format
-                        cleaned = cleaned.substring(0, 7) + cleaned.substring(7).replace(/[^\d]/g, '');
-                    } else {
-                        // Remove all non-digit characters
-                        cleaned = cleaned.replace(/[^\d]/g, '');
-                    }
+                    // Remove all non-digit characters
+                    cleaned = cleaned.replace(/[^\d]/g, '');
                     
                     return cleaned;
                 });
@@ -512,8 +500,8 @@ const gasManager = {
         }
         
         // Remove duplicates and empty strings
-        const uniqueMatches = [...new Set(allMatches)].filter(match => match && match.length >= 4);
-        console.log('Final unique matches:', uniqueMatches);
+        const uniqueMatches = [...new Set(allMatches)].filter(match => match && match.length >= 6);
+        console.log('Final unique matches before validation:', uniqueMatches);
         
         return uniqueMatches;
     },
@@ -525,31 +513,33 @@ const gasManager = {
         // Convert to string in case it's a number
         const codeStr = String(code);
         
-        // Basic validation rules:
-        // 1. Must be all digits after cleaning (allowing for hyphen at 7th position)
-        // 2. Must start with 7563
-        // 3. Must be at least 8 digits (7563 + at least 4 more digits)
-        // 4. Must not be more than 16 digits (reasonable upper limit)
+        // 1. Clean the code - remove all non-digit characters including spaces and hyphens
+        let cleanedCode = codeStr.replace(/[^\d]/g, '');
         
-        // Check if the code follows the format "756311-123456"
-        const hyphenPattern = /^7563\d{2}\-\d+$/;
-        if (hyphenPattern.test(codeStr)) {
-            // Remove the hyphen and return
-            return codeStr.replace('-', '');
+        console.log('Code after cleaning:', cleanedCode);
+        
+        // 2. Check if it starts with the required prefix 756311
+        if (!cleanedCode.startsWith('756311')) {
+            console.log('Code rejected: Does not start with 756311');
+            return false;
         }
         
-        // Otherwise, handle regular codes
-        // Remove any non-digit characters (final cleaning)
-        const cleanedCode = codeStr.replace(/[^\d]/g, '');
+        // 3. Ensure exact length of 14 digits
+        if (cleanedCode.length < 14) {
+            // Pad with zeros if needed to reach 14 digits
+            cleanedCode = cleanedCode.padEnd(14, '0');
+            console.log('Code padded to 14 digits:', cleanedCode);
+        } else if (cleanedCode.length > 14) {
+            // Truncate to 14 digits if longer
+            cleanedCode = cleanedCode.substring(0, 14);
+            console.log('Code truncated to 14 digits:', cleanedCode);
+        }
         
-        // Check if it starts with 7563
-        const startsWithPrefix = cleanedCode.startsWith('7563');
+        // Format the code for display/storage (optional: add hyphen after prefix)
+        // const formattedCode = cleanedCode.substring(0, 6) + '-' + cleanedCode.substring(6);
+        // console.log('Final formatted code:', formattedCode);
         
-        // Check length constraints
-        const validLength = cleanedCode.length >= 8 && cleanedCode.length <= 16;
-        
-        // All criteria must be met
-        return startsWithPrefix && validLength ? cleanedCode : false;
+        return cleanedCode;
     },
     
     // Process extracted codes with validation
@@ -567,12 +557,22 @@ const gasManager = {
         if (validatedCodes.length === 0 && codes.length > 0) {
             console.log('No valid codes found, trying more lenient validation');
             
-            // More lenient validation - if any code contains 7563 sequence
+            // More lenient validation - if any code contains 756311 sequence
             const lenientCodes = codes
                 .map(code => {
-                    // If the code contains 7563 anywhere, extract from that point onwards
-                    const match = String(code).match(/7563\d+/);
-                    return match ? match[0] : false;
+                    // If the code contains 756311 anywhere, extract from that point onwards
+                    const match = String(code).match(/756311\d*/);
+                    if (match) {
+                        let extractedCode = match[0];
+                        // Ensure it's 14 digits (including the 756311 prefix)
+                        if (extractedCode.length < 14) {
+                            extractedCode = extractedCode.padEnd(14, '0');
+                        } else if (extractedCode.length > 14) {
+                            extractedCode = extractedCode.substring(0, 14);
+                        }
+                        return extractedCode;
+                    }
+                    return false;
                 })
                 .filter(code => code !== false);
                 
@@ -640,7 +640,7 @@ const gasManager = {
                                 ${this.cylinders.length > 0 ? 
                                     this.cylinders.map(cylinder => `
                                         <tr>
-                                            <td>${cylinder.code}</td>
+                                            <td>${this.formatCylinderCode(cylinder.code)}</td>
                                             <td>${cylinder.gasType}</td>
                                             <td>${cylinder.pressure} bar</td>
                                             <td>${cylinder.cylinderVolume || '50'} L</td>
@@ -658,6 +658,9 @@ const gasManager = {
         
         // Create a form for each detected code
         codes.forEach((code, index) => {
+            // Format the code for display
+            const formattedCode = this.formatCylinderCode(code);
+            
             // Check if cylinder already exists in stock
             const existingCylinder = this.cylinders.find(c => c.code === code);
             const cylinderForm = document.createElement('div');
@@ -668,13 +671,13 @@ const gasManager = {
                 cylinderForm.innerHTML = `
                     <div class="alert alert-warning mb-2">
                         <i class="fas fa-exclamation-triangle me-2"></i>
-                        Cylinder ${code} already exists in stock (${existingCylinder.gasType}, ${existingCylinder.pressure} bar)
+                        Cylinder ${formattedCode} already exists in stock (${existingCylinder.gasType}, ${existingCylinder.pressure} bar)
                     </div>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group mb-2">
                                 <label>Cylinder Code</label>
-                                <input type="text" class="form-control batch-cylinder-code" value="${code}" readonly>
+                                <input type="text" class="form-control batch-cylinder-code" value="${code}" required>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -727,7 +730,8 @@ const gasManager = {
                         <div class="col-md-6">
                             <div class="form-group mb-2">
                                 <label>Cylinder Code</label>
-                                <input type="text" class="form-control batch-cylinder-code" value="${code}" readonly>
+                                <input type="text" class="form-control batch-cylinder-code" value="${code}" required>
+                                <small class="text-muted">Format: ${formattedCode}</small>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -1196,7 +1200,7 @@ const gasManager = {
                                 ${this.cylinders.length > 0 ? 
                                     this.cylinders.map(cylinder => `
                                         <tr>
-                                            <td>${cylinder.code}</td>
+                                            <td>${this.formatCylinderCode(cylinder.code)}</td>
                                             <td>${cylinder.gasType}</td>
                                             <td>${cylinder.pressure} bar</td>
                                             <td>${cylinder.cylinderVolume || '50'} L</td>
@@ -1218,6 +1222,9 @@ const gasManager = {
         
         // Create a form for each detected code
         codes.forEach((code, index) => {
+            // Format the code for display
+            const formattedCode = this.formatCylinderCode(code);
+            
             // Check if the cylinder exists in stock
             const cylinder = this.cylinders.find(c => c.code === code);
             
@@ -1237,7 +1244,9 @@ const gasManager = {
                         <div class="col-md-6">
                             <div class="form-group mb-2">
                                 <label>Codice Bombola</label>
-                                <input type="text" class="form-control batch-return-code" value="${code}" readonly>
+                                <input type="text" class="form-control batch-return-code" value="${code}" required>
+                                <input type="hidden" class="batch-return-original-code" value="${code}">
+                                <small class="text-muted">Format: ${formattedCode}</small>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -1283,7 +1292,8 @@ const gasManager = {
                         <div class="col-md-6">
                             <div class="form-group mb-2">
                                 <label>Codice Bombola</label>
-                                <input type="text" class="form-control batch-return-code" value="${code}" readonly>
+                                <input type="text" class="form-control batch-return-code" value="${code}" required>
+                                <small class="text-muted">Format: ${formattedCode}</small>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -1340,13 +1350,17 @@ const gasManager = {
             const codeInput = form.querySelector('.batch-return-code');
             if (!codeInput) return;
             
-            const code = codeInput.value.trim();
+            const newCode = codeInput.value.trim();
             
-            // Find cylinder in stock
-            const cylinderIndex = this.cylinders.findIndex(c => c.code === code);
+            // Get the original code (if it exists)
+            const originalCodeInput = form.querySelector('.batch-return-original-code');
+            const originalCode = originalCodeInput ? originalCodeInput.value.trim() : newCode;
+            
+            // Find cylinder in stock using the original code
+            const cylinderIndex = this.cylinders.findIndex(c => c.code === originalCode);
             
             if (cylinderIndex === -1) {
-                this.showNotification(`Bombola ${code} non trovata in stock`, 'warning');
+                this.showNotification(`Bombola ${originalCode} non trovata in stock`, 'warning');
                 return;
             }
             
@@ -1356,9 +1370,9 @@ const gasManager = {
             const pressureOutInput = form.querySelector('.batch-return-pressure-out');
             const pressureOut = pressureOutInput ? pressureOutInput.value : 0;
             
-            // Create history record
+            // Create history record with potentially updated code
             const historyRecord = {
-                code: cylinder.code,
+                code: newCode, // Use potentially updated code
                 gasType: cylinder.gasType,
                 pressureIn: cylinder.pressure,
                 cylinderVolume: cylinder.cylinderVolume || '50',
@@ -1546,6 +1560,25 @@ const gasManager = {
         }
     },
     
+    // Format cylinder code for display (add hyphen after prefix)
+    formatCylinderCode: function(code) {
+        if (!code) return '';
+        
+        // Ensure code is a string
+        const codeStr = String(code);
+        
+        // If code is already formatted with hyphen, return as is
+        if (codeStr.includes('-')) return codeStr;
+        
+        // Otherwise format it with hyphen after prefix
+        if (codeStr.length >= 6) {
+            return codeStr.substring(0, 6) + '-' + codeStr.substring(6);
+        }
+        
+        // If code is too short, just return it unchanged
+        return codeStr;
+    },
+    
     // Render stock table
     renderStockTable: function() {
         const tableBody = document.getElementById('stockTable');
@@ -1563,23 +1596,182 @@ const gasManager = {
             
             const formattedDate = new Date(cylinder.entryDate).toLocaleDateString('en-US');
             const physicalFormLabel = this.getPhysicalFormLabel(cylinder.physicalForm);
+            const formattedCode = this.formatCylinderCode(cylinder.code);
             
             row.innerHTML = `
-                <td>${cylinder.code}</td>
+                <td>${formattedCode}</td>
                 <td>${cylinder.gasType}</td>
                 <td>${cylinder.pressure} bar</td>
                 <td>${cylinder.cylinderVolume || '50'} L</td>
                 <td>${physicalFormLabel}</td>
                 <td>${formattedDate}</td>
                 <td>
-                    <button class="btn btn-sm btn-danger" onclick="gasManager.returnCylinder('${cylinder.code}')">
-                        <i class="fas fa-undo"></i> Return
-                    </button>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-primary" onclick="gasManager.editCylinder('${cylinder.code}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="gasManager.returnCylinder('${cylinder.code}')">
+                            <i class="fas fa-undo"></i> Return
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="gasManager.deleteCylinder('${cylinder.code}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </td>
             `;
             
             tableBody.appendChild(row);
         });
+    },
+    
+    // Edit cylinder from stock table
+    editCylinder: function(code) {
+        // Find cylinder in stock
+        const cylinder = this.cylinders.find(c => c.code === code);
+        
+        if (!cylinder) {
+            this.showNotification('Cylinder not found in stock', 'error');
+            return;
+        }
+        
+        // Create modal for editing if it doesn't exist
+        let editModal = document.getElementById('editCylinderModal');
+        
+        if (!editModal) {
+            // Create the modal
+            const modalHTML = `
+                <div class="modal fade" id="editCylinderModal" tabindex="-1" aria-labelledby="editCylinderModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editCylinderModalLabel">Edit Cylinder</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="editCylinderForm">
+                                    <input type="hidden" id="originalCylinderCode">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="editCylinderCode">Cylinder Code</label>
+                                        <input type="text" class="form-control" id="editCylinderCode" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label" for="editGasType">Gas Type</label>
+                                        <select class="form-select" id="editGasType" required>
+                                            <option value="">Select...</option>
+                                            <option value="H2">H2</option>
+                                            <option value="N2">N2</option>
+                                            <option value="CO2">CO2</option>
+                                            <option value="NH3">NH3</option>
+                                            <option value="N2 50ppm">N2 50 ppm</option>
+                                            <option value="N2 450ppm">N2 450 ppm</option>
+                                            <option value="Air">Air</option>
+                                            <option value="He">He</option>
+                                            <option value="Mix">Mix</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label" for="editPressure">Pressure (bar)</label>
+                                        <input type="number" class="form-control" id="editPressure" min="0" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label" for="editCylinderVolume">Cylinder Volume (L)</label>
+                                        <input type="number" class="form-control" id="editCylinderVolume" min="0" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label" for="editPhysicalForm">Physical Form</label>
+                                        <select class="form-select" id="editPhysicalForm" required>
+                                            <option value="gas">Gas</option>
+                                            <option value="liquid">Liquid</option>
+                                            <option value="liquidWithDip">Liquid with dip tube</option>
+                                        </select>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary" id="saveEditCylinderBtn">Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Append to body
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            editModal = document.getElementById('editCylinderModal');
+            
+            // Add event listener for save button
+            document.getElementById('saveEditCylinderBtn').addEventListener('click', () => {
+                this.saveEditCylinder();
+            });
+        }
+        
+        // Store the original code in a hidden field for reference
+        document.getElementById('originalCylinderCode').value = cylinder.code;
+        
+        // Fill the form with cylinder data
+        document.getElementById('editCylinderCode').value = cylinder.code;
+        document.getElementById('editGasType').value = cylinder.gasType;
+        document.getElementById('editPressure').value = cylinder.pressure;
+        document.getElementById('editCylinderVolume').value = cylinder.cylinderVolume || '50';
+        document.getElementById('editPhysicalForm').value = cylinder.physicalForm;
+        
+        // Show the modal
+        const modal = new bootstrap.Modal(editModal);
+        modal.show();
+    },
+    
+    // Save edited cylinder
+    saveEditCylinder: function() {
+        const originalCode = document.getElementById('originalCylinderCode').value;
+        const newCode = document.getElementById('editCylinderCode').value.trim();
+        const gasType = document.getElementById('editGasType').value;
+        const pressure = document.getElementById('editPressure').value;
+        const cylinderVolume = document.getElementById('editCylinderVolume').value;
+        const physicalForm = document.getElementById('editPhysicalForm').value;
+        
+        // Validate input
+        if (!newCode || !gasType || !pressure || !cylinderVolume) {
+            this.showNotification('Please fill in all required fields', 'error');
+            return;
+        }
+        
+        // Find cylinder in stock using the original code
+        const cylinderIndex = this.cylinders.findIndex(c => c.code === originalCode);
+        
+        if (cylinderIndex === -1) {
+            this.showNotification('Cylinder not found in stock', 'error');
+            return;
+        }
+        
+        // Check if the new code already exists (only if code has changed)
+        if (newCode !== originalCode && this.cylinders.some(c => c.code === newCode)) {
+            this.showNotification(`Cylinder with code ${newCode} already exists in stock`, 'error');
+            return;
+        }
+        
+        // Update cylinder data
+        this.cylinders[cylinderIndex].code = newCode;
+        this.cylinders[cylinderIndex].gasType = gasType;
+        this.cylinders[cylinderIndex].pressure = pressure;
+        this.cylinders[cylinderIndex].cylinderVolume = cylinderVolume;
+        this.cylinders[cylinderIndex].physicalForm = physicalForm;
+        
+        // Save to localStorage
+        this.saveToLocalStorage();
+        
+        // Update UI
+        this.renderStockTable();
+        this.updateFilterOptions();
+        
+        // Close the modal
+        const editModal = bootstrap.Modal.getInstance(document.getElementById('editCylinderModal'));
+        if (editModal) {
+            editModal.hide();
+        }
+        
+        this.showNotification('Cylinder updated successfully', 'success');
     },
     
     // Return cylinder directly from stock table
@@ -1604,6 +1796,32 @@ const gasManager = {
         this.showNotification('Enter residual pressure and confirm return', 'info');
     },
     
+    // Delete cylinder directly from stock table
+    deleteCylinder: function(code) {
+        if (!confirm(`Are you sure you want to delete cylinder ${code} from stock?\nThis action cannot be undone.`)) {
+            return;
+        }
+        
+        const cylinderIndex = this.cylinders.findIndex(c => c.code === code);
+        
+        if (cylinderIndex === -1) {
+            this.showNotification('Cylinder not found in stock', 'error');
+            return;
+        }
+        
+        // Remove from stock
+        this.cylinders.splice(cylinderIndex, 1);
+        
+        // Save to localStorage
+        this.saveToLocalStorage();
+        
+        // Update UI
+        this.renderStockTable();
+        this.updateFilterOptions();
+        
+        this.showNotification(`Cylinder ${code} has been deleted from stock`, 'success');
+    },
+    
     // Render history table
     renderHistoryTable: function() {
         const tableBody = document.getElementById('historyTable');
@@ -1621,9 +1839,10 @@ const gasManager = {
             
             const entryDate = new Date(record.entryDate).toLocaleDateString('en-US');
             const exitDate = new Date(record.exitDate).toLocaleDateString('en-US');
+            const formattedCode = this.formatCylinderCode(record.code);
             
             row.innerHTML = `
-                <td>${record.code}</td>
+                <td>${formattedCode}</td>
                 <td>${record.gasType}</td>
                 <td>${record.pressureIn} bar</td>
                 <td>${record.cylinderVolume || '50'} L</td>
@@ -1671,14 +1890,159 @@ const gasManager = {
     
     // Apply stock filters
     applyStockFilters: function() {
-        this.renderStockTable();
+        const gasFilter = document.getElementById('stockGasFilter').value;
+        const formFilter = document.getElementById('stockFormFilter').value;
+        const sortOption = document.getElementById('stockSort').value;
+        
+        // Create a filtered copy of the cylinders array
+        let filteredCylinders = [...this.cylinders];
+        
+        // Apply gas filter if selected
+        if (gasFilter) {
+            filteredCylinders = filteredCylinders.filter(c => c.gasType === gasFilter);
+        }
+        
+        // Apply form filter if selected
+        if (formFilter) {
+            filteredCylinders = filteredCylinders.filter(c => c.physicalForm === formFilter);
+        }
+        
+        // Apply sorting
+        if (sortOption === 'date') {
+            filteredCylinders.sort((a, b) => new Date(b.entryDate) - new Date(a.entryDate));
+        } else if (sortOption === 'code') {
+            filteredCylinders.sort((a, b) => a.code.localeCompare(b.code));
+        } else if (sortOption === 'gas') {
+            filteredCylinders.sort((a, b) => a.gasType.localeCompare(b.gasType));
+        }
+        
+        // Render the filtered table
+        this.renderFilteredStockTable(filteredCylinders);
+        
         this.showNotification('Filters applied', 'info');
+    },
+    
+    // Render filtered stock table
+    renderFilteredStockTable: function(filteredCylinders) {
+        const tableBody = document.getElementById('stockTable');
+        tableBody.innerHTML = '';
+        
+        if (filteredCylinders.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = '<td colspan="7" class="text-center">No cylinders match the selected filters</td>';
+            tableBody.appendChild(row);
+            return;
+        }
+        
+        filteredCylinders.forEach(cylinder => {
+            const row = document.createElement('tr');
+            
+            const formattedDate = new Date(cylinder.entryDate).toLocaleDateString('en-US');
+            const physicalFormLabel = this.getPhysicalFormLabel(cylinder.physicalForm);
+            const formattedCode = this.formatCylinderCode(cylinder.code);
+            
+            row.innerHTML = `
+                <td>${formattedCode}</td>
+                <td>${cylinder.gasType}</td>
+                <td>${cylinder.pressure} bar</td>
+                <td>${cylinder.cylinderVolume || '50'} L</td>
+                <td>${physicalFormLabel}</td>
+                <td>${formattedDate}</td>
+                <td>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-primary" onclick="gasManager.editCylinder('${cylinder.code}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="gasManager.returnCylinder('${cylinder.code}')">
+                            <i class="fas fa-undo"></i> Return
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="gasManager.deleteCylinder('${cylinder.code}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            
+            tableBody.appendChild(row);
+        });
     },
     
     // Apply history filters
     applyHistoryFilters: function() {
-        this.renderHistoryTable();
+        const gasFilter = document.getElementById('historyGasFilter').value;
+        const dateFilter = document.getElementById('historyDateFilter').value;
+        const sortOption = document.getElementById('historySort').value;
+        
+        // Create a filtered copy of the history array
+        let filteredHistory = [...this.history];
+        
+        // Apply gas filter if selected
+        if (gasFilter) {
+            filteredHistory = filteredHistory.filter(h => h.gasType === gasFilter);
+        }
+        
+        // Apply date filter if selected
+        if (dateFilter) {
+            const filterDate = new Date(dateFilter);
+            filterDate.setHours(0, 0, 0, 0); // Set to start of day
+            
+            filteredHistory = filteredHistory.filter(h => {
+                const entryDate = new Date(h.entryDate);
+                entryDate.setHours(0, 0, 0, 0); // Set to start of day
+                
+                const exitDate = new Date(h.exitDate);
+                exitDate.setHours(0, 0, 0, 0); // Set to start of day
+                
+                // Match if either entry or exit date matches the filter date
+                return entryDate.getTime() === filterDate.getTime() || 
+                       exitDate.getTime() === filterDate.getTime();
+            });
+        }
+        
+        // Apply sorting
+        if (sortOption === 'dateIn') {
+            filteredHistory.sort((a, b) => new Date(b.entryDate) - new Date(a.entryDate));
+        } else if (sortOption === 'dateOut') {
+            filteredHistory.sort((a, b) => new Date(b.exitDate) - new Date(a.exitDate));
+        }
+        
+        // Render the filtered table
+        this.renderFilteredHistoryTable(filteredHistory);
+        
         this.showNotification('Filters applied', 'info');
+    },
+    
+    // Render filtered history table
+    renderFilteredHistoryTable: function(filteredHistory) {
+        const tableBody = document.getElementById('historyTable');
+        tableBody.innerHTML = '';
+        
+        if (filteredHistory.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = '<td colspan="7" class="text-center">No records match the selected filters</td>';
+            tableBody.appendChild(row);
+            return;
+        }
+        
+        filteredHistory.forEach(record => {
+            const row = document.createElement('tr');
+            
+            const entryDate = new Date(record.entryDate).toLocaleDateString('en-US');
+            const exitDate = new Date(record.exitDate).toLocaleDateString('en-US');
+            const formattedCode = this.formatCylinderCode(record.code);
+            
+            row.innerHTML = `
+                <td>${formattedCode}</td>
+                <td>${record.gasType}</td>
+                <td>${record.pressureIn} bar</td>
+                <td>${record.cylinderVolume || '50'} L</td>
+                <td>${record.pressureOut} bar</td>
+                <td>${entryDate}</td>
+                <td>${exitDate}</td>
+            `;
+            
+            tableBody.appendChild(row);
+        });
     },
     
     // Export stock to CSV

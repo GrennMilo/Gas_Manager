@@ -174,9 +174,8 @@ The application uses a simple but effective data model with two main entities:
 
 ### Installation Steps
 
-1. **Clone or download the repository**
+1. **download the repository**
    ```bash
-   git clone https://github.com/yourusername/cylinder-management.git
    cd cylinder-management
    ```
 
