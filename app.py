@@ -5,10 +5,12 @@ import csv
 import datetime
 import mimetypes
 import socket
+import ssl
 from flask import Flask, render_template, request, send_file, jsonify, send_from_directory
 from flask_cors import CORS
 import webbrowser
 from threading import Timer
+import glob
 
 # Ensure proper MIME types
 mimetypes.add_type('text/css', '.css')
@@ -19,6 +21,11 @@ mimetypes.add_type('image/jpeg', '.jpeg')
 
 # Define the base directory
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Define SSL certificate paths
+SSL_DIR = os.path.join(BASE_DIR, "ssl")
+SSL_CERT = os.path.join(SSL_DIR, "cert.pem")
+SSL_KEY = os.path.join(SSL_DIR, "key.pem")
 
 # Create Flask app with static folder configuration
 app = Flask(__name__, static_folder=BASE_DIR, static_url_path='')
@@ -67,6 +74,11 @@ def get_local_ip():
 def index():
     """Serve the main HTML page"""
     return send_from_directory(BASE_DIR, 'gas.html')
+
+@app.route('/camera-test')
+def camera_test():
+    """Serve the camera test diagnostic tool"""
+    return send_from_directory(BASE_DIR, 'camera_test.html')
 
 @app.route('/<path:path>')
 def serve_static(path):
@@ -299,16 +311,133 @@ def download_file(filename):
     """Download a file from the reports directory"""
     return send_from_directory(OUTPUT_DIR, filename, as_attachment=True)
 
+def get_latest_backup():
+    """Find the most recent backup file in the reports directory"""
+    backup_files = glob.glob(os.path.join(OUTPUT_DIR, "backup_data_*.json"))
+    if not backup_files:
+        return None
+    
+    # Sort files by modification time (newest first)
+    latest_file = max(backup_files, key=os.path.getmtime)
+    return latest_file
+
+@app.route('/api/load-data', methods=['GET'])
+def load_data():
+    """Load data from the most recent backup file"""
+    latest_backup = get_latest_backup()
+    
+    if not latest_backup:
+        return jsonify({
+            'success': False,
+            'message': 'Nessun backup trovato',
+            'data': {'cylinders': [], 'history': []}
+        })
+    
+    try:
+        with open(latest_backup, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            
+        return jsonify({
+            'success': True,
+            'message': f'Dati caricati da {os.path.basename(latest_backup)}',
+            'data': data
+        })
+    
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Errore durante il caricamento dei dati: {str(e)}',
+            'data': {'cylinders': [], 'history': []}
+        }), 500
+
+@app.route('/api/list-backups', methods=['GET'])
+def list_backups():
+    """List all available backup files"""
+    backup_files = glob.glob(os.path.join(OUTPUT_DIR, "backup_data_*.json"))
+    
+    if not backup_files:
+        return jsonify({
+            'success': False,
+            'message': 'Nessun backup trovato',
+            'backups': []
+        })
+    
+    # Sort files by modification time (newest first)
+    backup_files.sort(key=os.path.getmtime, reverse=True)
+    
+    # Extract file information
+    backups = []
+    for file_path in backup_files:
+        filename = os.path.basename(file_path)
+        mod_time = datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
+        
+        # Try to get cylinder and history counts
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                cylinders_count = len(data.get('cylinders', []))
+                history_count = len(data.get('history', []))
+        except:
+            cylinders_count = 0
+            history_count = 0
+        
+        backups.append({
+            'filename': filename,
+            'modified': mod_time.strftime("%d/%m/%Y %H:%M:%S"),
+            'cylinders_count': cylinders_count,
+            'history_count': history_count
+        })
+    
+    return jsonify({
+        'success': True,
+        'message': f'Trovati {len(backups)} backup',
+        'backups': backups
+    })
+
+@app.route('/api/load-backup/<path:filename>', methods=['GET'])
+def load_specific_backup(filename):
+    """Load data from a specific backup file"""
+    file_path = os.path.join(OUTPUT_DIR, filename)
+    
+    if not os.path.exists(file_path):
+        return jsonify({
+            'success': False,
+            'message': f'Backup {filename} non trovato',
+            'data': {'cylinders': [], 'history': []}
+        }), 404
+    
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            
+        return jsonify({
+            'success': True,
+            'message': f'Dati caricati da {filename}',
+            'data': data
+        })
+    
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Errore durante il caricamento del backup: {str(e)}',
+            'data': {'cylinders': [], 'history': []}
+        }), 500
+
 def open_browser():
     """Open browser after Flask app starts"""
     # Get local IP address
     local_ip = get_local_ip()
-    # Open browser to the local IP address
-    webbrowser.open_new(f'http://{local_ip}:5001/')
+    # Open browser to the local IP address using HTTPS
+    webbrowser.open_new(f'https://{local_ip}:8078/')
 
 if __name__ == '__main__':
     # Get local IP address
     local_ip = get_local_ip()
+    
+    # Check if SSL certificates exist
+    if not os.path.exists(SSL_CERT) or not os.path.exists(SSL_KEY):
+        print("\nERROR: SSL certificates not found. Please run 'python create_cert.py' first.")
+        sys.exit(1)
     
     # Open browser automatically
     Timer(1, open_browser).start()
@@ -317,12 +446,21 @@ if __name__ == '__main__':
     print("\n" + "="*80)
     print(" RMIC - Gestione Bombole in Pressione - Server Report".center(80))
     print("="*80)
-    print(f" Server avviato: http://{local_ip}:5001/")
-    print(f" Accesso locale: http://127.0.0.1:5001/")
+    print(f" Server avviato: https://{local_ip}:8078/")
+    print(f" Accesso locale: https://127.0.0.1:8078/")
     print(f" Directory report: {os.path.abspath(OUTPUT_DIR)}")
     print("="*80)
     print(" Per terminare premere CTRL+C")
     print("="*80 + "\n")
     
-    # Start Flask app with network access
-    app.run(host='0.0.0.0', port=5001, debug=False) 
+    # Create SSL context
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    context.load_cert_chain(SSL_CERT, SSL_KEY)
+    
+    # Start Flask app with network access and SSL
+    app.run(
+        host='0.0.0.0', 
+        port=8078, 
+        debug=False,
+        ssl_context=context
+    ) 

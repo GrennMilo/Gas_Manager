@@ -81,38 +81,6 @@
             width: auto;
         }
 
-        .preview-container {
-            width: 100%;
-            max-width: 640px;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        .preview-image {
-            width: 100%;
-            height: auto;
-            border-radius: 8px;
-        }
-
-        .ocr-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            pointer-events: none;
-        }
-
-        .ocr-result {
-            background: rgba(255, 255, 224, 0.2);
-            border: 1px solid rgba(70, 130, 180, 0.5);
-            padding: 2px;
-            position: absolute;
-            font-family: monospace;
-            font-size: 12px;
-            color: #000;
-        }
-
         .scan-mode-switch {
             margin-bottom: 1rem;
         }
@@ -140,7 +108,75 @@
             transform: translateX(-50%);
             z-index: 100;
         }
+        
+        #certWarning {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: #f8d7da;
+            color: #721c24;
+            text-align: center;
+            padding: 15px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            font-size: 14px;
+        }
+        
+        #certWarning .cert-instructions {
+            background-color: #fff;
+            border: 1px solid #dc3545;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+            text-align: left;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        #certWarning .cert-instructions h5 {
+            color: #721c24;
+            margin-bottom: 10px;
+        }
+        
+        #certWarning .cert-instructions ol {
+            margin-bottom: 0;
+            padding-left: 25px;
+        }
     </style>
+    <script>
+        // Check if running on a secure context
+        if (window.isSecureContext) {
+            console.log("Running in a secure context, camera access should work");
+        } else {
+            console.error("Not running in a secure context, camera access may be blocked");
+            // Show certificate warning when loaded
+            window.addEventListener('DOMContentLoaded', () => {
+                const warning = document.createElement('div');
+                warning.id = 'certWarning';
+                warning.innerHTML = `
+                    <strong>⚠️ Attenzione: Certificato di Sicurezza ⚠️</strong>
+                    <p>Per utilizzare la fotocamera, è necessario approvare il certificato di sicurezza autofirmato.</p>
+                    
+                    <div class="cert-instructions">
+                        <h5>Come accettare il certificato:</h5>
+                        <ol>
+                            <li>Se vedi un messaggio di errore come "Il sito non può fornire una connessione protetta", fai clic su "Avanzate" o "Dettagli"</li>
+                            <li>Poi clicca su "Procedi su [sito]" o "Accetta il rischio e continua"</li>
+                            <li>Dovrai farlo solo una volta per sessione di navigazione</li>
+                            <li>Assicurati di usare <strong>https://</strong> nell'URL (non http://)</li>
+                        </ol>
+                    </div>
+                    
+                    <button class="btn btn-sm btn-danger mt-2" onclick="this.parentNode.style.display='none'">Chiudi questo messaggio</button>
+                `;
+                document.body.prepend(warning);
+                warning.style.display = 'block';
+            });
+        }
+    </script>
 </head>
 <body class="bg-light">
     <div class="container mt-4">
@@ -166,11 +202,6 @@
                             </div>
                         </div>
 
-                        <div class="preview-container mb-3" id="previewContainer" style="display: none;">
-                            <img id="previewImage" class="preview-image">
-                            <div class="ocr-overlay" id="ocrOverlay"></div>
-                        </div>
-
                         <!-- Container per i form delle bombole -->
                         <div id="cylinderFormsContainer"></div>
                     </div>
@@ -188,8 +219,11 @@
                                     <option value="N2">N2</option>
                                     <option value="CO2">CO2</option>
                                     <option value="NH3">NH3</option>
-                                    <option value="N2p">N2p.</option>
+                                    <option value="N2 50ppm">N2 50 ppm</option>
+                                    <option value="N2 450ppm">N2 450 ppm</option>
                                     <option value="Air">Air</option>
+                                    <option value="He">He</option>
+                                    <option value="Mix">Mix</option>
                                     <option value="other">Altro</option>
                                 </select>
                             </div>
@@ -258,11 +292,18 @@
                             <button class="btn btn-success" onclick="gasManager.exportStock()" title="Esporta stock attuale">
                                 <i class="fas fa-file-export"></i>
                             </button>
+                            <button class="btn btn-info" onclick="gasManager.refreshFromServer()" title="Aggiorna dati dal server">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="card-body">
+                <!-- Display data source information -->
+                <div class="text-end mb-2">
+                    <small id="dataSourceInfo" class="text-muted"></small>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
@@ -299,10 +340,10 @@
                             <div class="scanner-controls">
                                 <button class="btn btn-secondary me-2" id="returnTogglePreviewBtn">
                                     <i class="fas fa-camera"></i> Abilita Fotocamera
-                            </button>
+                                </button>
                                 <button class="btn btn-primary" id="returnCaptureBtn">
                                     <i class="fas fa-camera me-2"></i>Cattura
-                            </button>
+                                </button>
                             </div>
                             <div id="returnProgressBar">
                                 <div class="progress"></div>
@@ -318,8 +359,8 @@
                             <div class="card-body">
                                 <h5 class="card-title">Restituzione Manuale</h5>
                                 <form id="manualReturnForm">
-                            <div class="mb-3">
-                                <label class="form-label" for="manualReturnCode">Codice Bombola</label>
+                                    <div class="mb-3">
+                                        <label class="form-label" for="manualReturnCode">Codice Bombola</label>
                                         <div class="input-group">
                                             <input type="text" class="form-control" id="manualReturnCode" required 
                                                    placeholder="Inserisci il codice bombola" aria-label="Codice bombola">
@@ -338,16 +379,16 @@
                                         <label class="form-label" for="manualReturnPressureIn">Pressione Originale (bar)</label>
                                         <input type="number" class="form-control" id="manualReturnPressureIn" readonly
                                               title="Pressione originale" aria-label="Pressione originale" placeholder="Pressione originale">
-                            </div>
-                            <div class="mb-3">
+                                    </div>
+                                    <div class="mb-3">
                                         <label class="form-label" for="manualReturnPressureOut">Pressione Residua (bar)</label>
                                         <input type="number" class="form-control" id="manualReturnPressureOut" required 
                                               min="0" value="0" title="Pressione residua" aria-label="Pressione residua" placeholder="Pressione residua">
-                            </div>
+                                    </div>
                                     <button type="button" class="btn btn-danger w-100" onclick="gasManager.returnCylinderManual()">
-                                <i class="fas fa-undo me-2"></i>Restituisci Bombola
-                            </button>
-                        </form>
+                                        <i class="fas fa-undo me-2"></i>Restituisci Bombola
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -426,9 +467,56 @@
             <button class="btn btn-primary" onclick="gasManager.exportAll()" title="Genera report completo">
                 <i class="fas fa-file-csv me-2"></i>Report Completo
             </button>
-            <button class="btn btn-secondary" onclick="gasManager.backupToServer()" title="Backup dati">
-                <i class="fas fa-cloud-upload-alt me-2"></i>Backup
+            <button class="btn btn-success" onclick="gasManager.createBackup()" title="Salva dati nel server">
+                <i class="fas fa-save me-2"></i>Salva
             </button>
+            <button class="btn btn-secondary" onclick="gasManager.showBackupManager()" title="Gestione backup">
+                <i class="fas fa-cloud-upload-alt me-2"></i>Backup Manager
+            </button>
+            <a href="/camera-test" class="btn btn-info" target="_blank" title="Strumento di diagnostica fotocamera">
+                <i class="fas fa-camera me-2"></i>Test Fotocamera
+            </a>
+        </div>
+    </div>
+
+    <!-- Modal per gestione backup -->
+    <div class="modal fade" id="backupModal" tabindex="-1" aria-labelledby="backupModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="backupModalLabel">Gestione Backup e Salvataggi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <h6>Salvataggi disponibili</h6>
+                        <button class="btn btn-sm btn-success" onclick="gasManager.createBackup()">
+                            <i class="fas fa-save me-1"></i>Crea nuovo salvataggio
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Nome file</th>
+                                    <th>Data modifica</th>
+                                    <th>Bombole</th>
+                                    <th>Storico</th>
+                                    <th>Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody id="backupsList">
+                                <tr>
+                                    <td colspan="5" class="text-center">Caricamento salvataggi...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -441,7 +529,7 @@
     <!-- QR Scanner -->
     <script src="https://cdn.jsdelivr.net/npm/html5-qrcode/html5-qrcode.min.js"></script>
     <!-- Tesseract.js -->
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.3/dist/tesseract.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
     <!-- XLSX -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
     <!-- App JS -->
