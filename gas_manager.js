@@ -633,6 +633,7 @@ const gasManager = {
                                     <th>Codice</th>
                                     <th>Gas</th>
                                     <th>Pressione</th>
+                                    <th>Volume</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -642,9 +643,10 @@ const gasManager = {
                                             <td>${cylinder.code}</td>
                                             <td>${cylinder.gasType}</td>
                                             <td>${cylinder.pressure} bar</td>
+                                            <td>${cylinder.cylinderVolume || '50'} L</td>
                                         </tr>
                                     `).join('') : 
-                                    '<tr><td colspan="3" class="text-center">Nessuna bombola in stock</td></tr>'
+                                    '<tr><td colspan="4" class="text-center">Nessuna bombola in stock</td></tr>'
                                 }
                             </tbody>
                         </table>
@@ -692,6 +694,14 @@ const gasManager = {
                             </div>
                         </div>
                         <div class="col-md-6">
+                            <div class="form-group mb-2">
+                                <label>Volume Cilindro (L)</label>
+                                <input type="number" class="form-control batch-cylinder-volume" value="${existingCylinder.cylinderVolume || '50'}" disabled>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
                             <div class="form-group mb-2">
                                 <label>Forma Fisica</label>
                                 <select class="form-select batch-cylinder-form" disabled>
@@ -747,6 +757,14 @@ const gasManager = {
                             </div>
                         </div>
                         <div class="col-md-6">
+                            <div class="form-group mb-2">
+                                <label>Volume Cilindro (L)</label>
+                                <input type="number" class="form-control batch-cylinder-volume" value="50" min="0" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
                             <div class="form-group mb-2">
                                 <label>Forma Fisica</label>
                                 <select class="form-select batch-cylinder-form" required>
@@ -816,10 +834,11 @@ const gasManager = {
             const code = form.querySelector('.batch-cylinder-code').value.trim();
             const gasType = form.querySelector('.batch-cylinder-gas').value;
             const pressure = form.querySelector('.batch-cylinder-pressure').value;
+            const cylinderVolume = form.querySelector('.batch-cylinder-volume').value;
             const physicalForm = form.querySelector('.batch-cylinder-form').value;
             
             // Validate input
-            if (!code || !gasType || !pressure) {
+            if (!code || !gasType || !pressure || !cylinderVolume) {
                 skippedCount++;
                 console.log(`Skipping cylinder ${code}: missing required fields`);
                 return; // Skip invalid entries
@@ -837,6 +856,7 @@ const gasManager = {
                 code,
                 gasType,
                 pressure,
+                cylinderVolume,
                 physicalForm,
                 entryDate: new Date().toISOString()
             };
@@ -1169,6 +1189,7 @@ const gasManager = {
                                     <th>Codice</th>
                                     <th>Gas</th>
                                     <th>Pressione</th>
+                                    <th>Volume</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1178,9 +1199,10 @@ const gasManager = {
                                             <td>${cylinder.code}</td>
                                             <td>${cylinder.gasType}</td>
                                             <td>${cylinder.pressure} bar</td>
+                                            <td>${cylinder.cylinderVolume || '50'} L</td>
                                         </tr>
                                     `).join('') : 
-                                    '<tr><td colspan="3" class="text-center">Nessuna bombola in stock</td></tr>'
+                                    '<tr><td colspan="4" class="text-center">Nessuna bombola in stock</td></tr>'
                                 }
                             </tbody>
                         </table>
@@ -1226,13 +1248,19 @@ const gasManager = {
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-group mb-2">
                                 <label>Pressione Originale (bar)</label>
                                 <input type="number" class="form-control batch-return-pressure-in" value="${cylinder.pressure}" readonly>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <div class="form-group mb-2">
+                                <label>Volume Cilindro (L)</label>
+                                <input type="number" class="form-control batch-return-volume" value="${cylinder.cylinderVolume || '50'}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
                             <div class="form-group mb-2">
                                 <label>Pressione Residua (bar)</label>
                                 <input type="number" class="form-control batch-return-pressure-out" value="${suggestedPressureOut}" min="0">
@@ -1333,6 +1361,7 @@ const gasManager = {
                 code: cylinder.code,
                 gasType: cylinder.gasType,
                 pressureIn: cylinder.pressure,
+                cylinderVolume: cylinder.cylinderVolume || '50',
                 pressureOut: pressureOut,
                 entryDate: cylinder.entryDate,
                 exitDate: new Date().toISOString()
@@ -1394,10 +1423,11 @@ const gasManager = {
         const code = document.getElementById('cylinderCode').value.trim();
         const gasType = document.getElementById('gasType').value;
         const pressure = document.getElementById('pressure').value;
+        const cylinderVolume = document.getElementById('cylinderVolume').value;
         const physicalForm = document.getElementById('physicalForm').value;
         
         // Validate input
-        if (!code || !gasType || !pressure) {
+        if (!code || !gasType || !pressure || !cylinderVolume) {
             this.showNotification('Compila tutti i campi richiesti', 'error');
             return;
         }
@@ -1413,6 +1443,7 @@ const gasManager = {
             code,
             gasType,
             pressure,
+            cylinderVolume,
             physicalForm,
             entryDate: new Date().toISOString()
         };
@@ -1462,6 +1493,7 @@ const gasManager = {
             code: cylinder.code,
             gasType: cylinder.gasType,
             pressureIn: cylinder.pressure,
+            cylinderVolume: cylinder.cylinderVolume || '50',
             pressureOut: pressureOut,
             entryDate: cylinder.entryDate,
             exitDate: new Date().toISOString()
@@ -1504,10 +1536,12 @@ const gasManager = {
         if (cylinder) {
             document.getElementById('manualReturnGasType').value = cylinder.gasType;
             document.getElementById('manualReturnPressureIn').value = cylinder.pressure;
+            document.getElementById('manualReturnVolume').value = cylinder.cylinderVolume || '50';
             this.showNotification('Bombola trovata in stock', 'success');
         } else {
             document.getElementById('manualReturnGasType').value = '';
             document.getElementById('manualReturnPressureIn').value = '';
+            document.getElementById('manualReturnVolume').value = '';
             this.showNotification('Bombola non trovata in stock', 'error');
         }
     },
@@ -1519,7 +1553,7 @@ const gasManager = {
         
         if (this.cylinders.length === 0) {
             const row = document.createElement('tr');
-            row.innerHTML = '<td colspan="6" class="text-center">Nessuna bombola in stock</td>';
+            row.innerHTML = '<td colspan="7" class="text-center">Nessuna bombola in stock</td>';
             tableBody.appendChild(row);
             return;
         }
@@ -1534,6 +1568,7 @@ const gasManager = {
                 <td>${cylinder.code}</td>
                 <td>${cylinder.gasType}</td>
                 <td>${cylinder.pressure} bar</td>
+                <td>${cylinder.cylinderVolume || '50'} L</td>
                 <td>${physicalFormLabel}</td>
                 <td>${formattedDate}</td>
                 <td>
@@ -1560,6 +1595,7 @@ const gasManager = {
         document.getElementById('manualReturnCode').value = cylinder.code;
         document.getElementById('manualReturnGasType').value = cylinder.gasType;
         document.getElementById('manualReturnPressureIn').value = cylinder.pressure;
+        document.getElementById('manualReturnVolume').value = cylinder.cylinderVolume || '50';
         document.getElementById('manualReturnPressureOut').value = '0';
         
         // Scroll to return section
@@ -1575,7 +1611,7 @@ const gasManager = {
         
         if (this.history.length === 0) {
             const row = document.createElement('tr');
-            row.innerHTML = '<td colspan="6" class="text-center">Nessun record nello storico</td>';
+            row.innerHTML = '<td colspan="7" class="text-center">Nessun record nello storico</td>';
             tableBody.appendChild(row);
             return;
         }
@@ -1590,6 +1626,7 @@ const gasManager = {
                 <td>${record.code}</td>
                 <td>${record.gasType}</td>
                 <td>${record.pressureIn} bar</td>
+                <td>${record.cylinderVolume || '50'} L</td>
                 <td>${record.pressureOut} bar</td>
                 <td>${entryDate}</td>
                 <td>${exitDate}</td>
