@@ -1,4 +1,4 @@
-# RMIC - Pressure Cylinder Management System
+# Linde/Pangas Pressure Cylinder Management System
 
 A comprehensive web application for tracking and managing pressurized gas cylinders throughout their lifecycle, from entry to exit, with detailed reporting capabilities and advanced OCR-based identification.
 
@@ -22,7 +22,7 @@ A comprehensive web application for tracking and managing pressurized gas cylind
 
 ## Overview
 
-The RMIC Pressure Cylinder Management System provides a complete solution for managing gas cylinders in industrial and laboratory settings. It allows organizations to track the entire lifecycle of pressurized gas cylinders, from their initial entry into inventory to their exit and usage history.
+The Linde/Pangas Pressure Cylinder Management System provides a complete solution for managing gas cylinders in industrial and laboratory settings. It allows organizations to track the entire lifecycle of pressurized gas cylinders, from their initial entry into inventory to their exit and usage history.
 
 The system combines a modern web interface with advanced technologies like Optical Character Recognition (OCR) to streamline the management process. By automating the identification and data entry of cylinders, it reduces human error and improves inventory accuracy.
 
@@ -176,8 +176,8 @@ The application uses a simple but effective data model with two main entities:
 
 1. **Clone or download the repository**
    ```bash
-   git clone https://github.com/GrennMilo/Gas_Manager.git
-   cd Gas_Manager
+   git clone https://github.com/yourusername/cylinder-management.git
+   cd cylinder-management
    ```
 
 2. **Create a Python virtual environment (optional but recommended)**
@@ -247,13 +247,23 @@ When accessing the application for the first time:
    - Data will be stored in your browser's local storage initially
    - Click "Backup" to save data to the server for persistence
 
+### Cylinder Code Format
+
+The application uses a standardized format for cylinder codes:
+
+- **Format**: 756311-XXXXXXXX (14 digits total)
+- **Prefix**: All valid codes must start with 756311
+- **Display**: Codes are displayed with a hyphen after the prefix
+- **Validation**: The system ensures all codes follow this format
+- **OCR Processing**: Intelligent handling of spaces, hyphens, and special characters
+
 ### Adding Cylinders to Inventory
 
 #### Method 1: Manual Entry
 
 1. Navigate to the "Cylinder Entry" section
 2. Fill in the cylinder details:
-   - **Cylinder Code**: The unique identifier (typically starting with 7563)
+   - **Cylinder Code**: The unique identifier (must start with 756311)
    - **Gas Type**: Select from the dropdown (H2, N2, CO2, etc.)
    - **Pressure (bar)**: The initial pressure (default: 200)
    - **Physical Form**: Gas, Liquid, or Liquid with dip tube
@@ -290,9 +300,19 @@ The Stock section provides a comprehensive view of all cylinders currently in in
    - Change the sort order using the dropdown
 
 3. **Actions**:
+   - Edit a cylinder by clicking the edit (pencil) icon
    - Return a cylinder by clicking the "Return" button
+   - Delete a cylinder by clicking the trash icon
    - Export the current stock to CSV by clicking the export icon
    - Refresh data from the server using the refresh icon
+
+### Editing Cylinders
+
+1. Click the edit (pencil) icon next to a cylinder
+2. Modify any field including the cylinder code
+3. Click "Save Changes"
+4. The system will validate the changes (including checking for duplicate codes)
+5. Cylinder information will be updated in the inventory
 
 ### Returning Cylinders
 
@@ -321,84 +341,61 @@ The Stock section provides a comprehensive view of all cylinders currently in in
 4. Select which cylinders to include in the return
 5. Click "Return Selected Cylinders"
 
-### Viewing History
+## License
 
-The History section displays all completed cylinder transactions:
+MIT License
 
-1. **Filtering Options**:
-   - Filter by date range
-   - Filter by gas type
-   - Sort by entry or exit date
+Copyright (c) 2023 Linde/Pangas
 
-2. **Data Displayed**:
-   - Cylinder code
-   - Gas type
-   - Initial pressure
-   - Residual pressure
-   - Entry date
-   - Exit date
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-3. **Export Options**:
-   - Export history to CSV by clicking the export icon
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-### Generating Reports
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
-#### Stock Report
+## Recent Updates
 
-1. Click the export icon in the Stock section
-2. A CSV file will be generated and downloaded
-3. The report includes all cylinders currently in stock
+### July 2023: Enhanced Cylinder Code Management
 
-#### History Report
+#### Standardized 14-digit Cylinder Codes
+- **Consistent Format**: All cylinder codes now follow a standardized 14-digit format
+- **Prefix Validation**: All codes must start with the 756311 prefix
+- **Automatic Formatting**: Codes are displayed with a hyphen separator (756311-xxxxxxxx)
+- **Smart Processing**: Handles spaces, hyphens, and other special characters during OCR
+- **Validation Logic**: Ensures code integrity with padding/truncation to maintain standard length
 
-1. Click the export icon in the History section
-2. A CSV file will be generated and downloaded
-3. The report includes all cylinder transactions
+#### Improved UI Features
+- **Edit Functionality**: Added ability to edit cylinder codes in all parts of the application
+- **Batch Processing**: Enhanced batch entry and return operations
+- **Format Indicators**: Added visual cues for proper code format
+- **Improved Filters**: Fixed and enhanced filtering functionality for better data management
 
-#### Comprehensive Report
+#### Advanced OCR Improvements
+- **Pattern Recognition**: Better detection of standard code formats from camera captures
+- **Error Handling**: Improved processing of OCR errors and distortions
+- **Confidence Scoring**: Better identification of valid cylinder codes
 
-1. Click "Report Complete" in the bottom toolbar
-2. A comprehensive CSV report will be generated containing:
-   - Current stock summary
-   - Inventory by gas type
-   - Complete transaction history
-   - Consumption analysis by gas type
+### June 2023: Multilingual Support
+- **English UI**: Complete translation of the interface to English
+- **Localized Reports**: Report generation in English
+- **Format Standardization**: Consistent date and number formatting across languages
 
-### Data Backup and Recovery
-
-#### Creating a Backup
-
-1. Click "Save" in the bottom toolbar
-2. The system will save all current data to the server
-3. A confirmation message will appear when the backup is complete
-
-#### Managing Backups
-
-1. Click "Backup Manager" in the bottom toolbar
-2. The Backup Manager dialog will display all available backups
-3. Each backup shows:
-   - Filename
-   - Creation date
-   - Number of cylinders
-   - Number of history records
-
-#### Restoring from Backup
-
-1. Open the Backup Manager
-2. Locate the backup you want to restore
-3. Click "Load" next to the backup
-4. Confirm the restoration
-5. The system will load the data from the backup
-
-### Camera Troubleshooting
-
-If you encounter issues with the camera:
-
-1. Click "Test Camera" in the bottom toolbar
-2. The Camera Test tool will open
-3. Test basic camera functionality
-4. Check for permission issues
-5. Verify browser compatibility
+### May 2023: Enhanced Consumption Reporting
+- **Volume Calculation**: Improved gas consumption metrics with volume (L) calculations
+- **Comprehensive Reports**: Enhanced report generation with detailed consumption analysis
+- **Data Visualization**: Better presentation of consumption trends
 
 ## Configuration
 
@@ -750,7 +747,7 @@ For larger installations, consider these performance improvements:
 
 MIT License
 
-Copyright (c) 2023 RMIC
+Copyright (c) 2023 Linde/Pangas
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -772,67 +769,34 @@ SOFTWARE.
 
 ## Recent Updates
 
-### June 2025 Updates
+### July 2023: Enhanced Cylinder Code Management
 
-#### Enhanced Consumption Reporting
+#### Standardized 14-digit Cylinder Codes
+- **Consistent Format**: All cylinder codes now follow a standardized 14-digit format
+- **Prefix Validation**: All codes must start with the 756311 prefix
+- **Automatic Formatting**: Codes are displayed with a hyphen separator (756311-xxxxxxxx)
+- **Smart Processing**: Handles spaces, hyphens, and other special characters during OCR
+- **Validation Logic**: Ensures code integrity with padding/truncation to maintain standard length
 
-The gas consumption calculation has been improved to provide more accurate volume metrics:
+#### Improved UI Features
+- **Edit Functionality**: Added ability to edit cylinder codes in all parts of the application
+- **Batch Processing**: Enhanced batch entry and return operations
+- **Format Indicators**: Added visual cues for proper code format
+- **Improved Filters**: Fixed and enhanced filtering functionality for better data management
 
-- **Direct Volume Calculation**: Gas consumption is now calculated using the formula `consumed_liters = (pressure_difference * cylinder_volume)`, which directly measures the volume of gas consumed
-- **Improved Reporting**: The "RIEPILOGO CONSUMO PER TIPO DI GAS" (Gas Consumption Summary) section in reports now clearly displays both pressure consumption (bar) and volume consumption (liters)
-- **Total Consumption Metrics**: Reports now include totals for both pressure and volume consumption across all gas types
+#### Advanced OCR Improvements
+- **Pattern Recognition**: Better detection of standard code formats from camera captures
+- **Error Handling**: Improved processing of OCR errors and distortions
+- **Confidence Scoring**: Better identification of valid cylinder codes
 
-#### Report Generation Improvements
+### June 2023: Multilingual Support
+- **English UI**: Complete translation of the interface to English
+- **Localized Reports**: Report generation in English
+- **Format Standardization**: Consistent date and number formatting across languages
 
-- **Comprehensive Reports**: The "Report Completo" (Complete Report) feature now generates more detailed analyses including stock status, gas type distribution, and consumption patterns
-- **CSV Format Optimization**: Improved CSV formatting for better compatibility with Excel and other data analysis tools
-- **Data Validation**: Enhanced validation of consumption calculations for more reliable reporting
-
-### English Translation Guide
-
-To translate the application interface and reporting to English, follow these steps:
-
-#### Translating the User Interface
-
-1. **HTML Translation**:
-   - Open `gas.html` and replace Italian text with English equivalents
-   - Translate button labels, form fields, and section headers
-   - Maintain all HTML attributes and structure
-
-2. **JavaScript Translation**:
-   - Open `gas_manager.js` and translate user-facing messages
-   - Update notification texts in the `showNotification` function calls
-   - Translate validation messages and alerts
-
-#### Translating Reports
-
-1. **Report Headers**:
-   - In `app.py`, find the `export_all`, `export_stock`, and `export_history` functions
-   - Translate CSV headers and section titles from Italian to English
-
-2. **Function Names**:
-   - Consider updating function names to reflect English terminology
-   - Update corresponding JavaScript function calls if necessary
-
-3. **Date Formatting**:
-   - The `format_date` function can be updated to use English date formatting if desired (MM/DD/YYYY instead of DD/MM/YYYY)
-
-#### Key Translation References
-
-| Italian Term | English Translation |
-|--------------|---------------------|
-| Bombole | Cylinders |
-| Storico | History |
-| Aggiungi a Stock | Add to Stock |
-| Restituisci | Return |
-| Codice Bombola | Cylinder Code |
-| Tipo Gas | Gas Type |
-| Pressione | Pressure |
-| Volume Cilindro | Cylinder Volume |
-| Forma Fisica | Physical Form |
-| Data Ingresso | Entry Date |
-| Data Uscita | Exit Date |
-| Consumo | Consumption |
-| Riepilogo | Summary |
+### May 2023: Enhanced Consumption Reporting
+- **Volume Calculation**: Improved gas consumption metrics with volume (L) calculations
+- **Comprehensive Reports**: Enhanced report generation with detailed consumption analysis
+- **Data Visualization**: Better presentation of consumption trends
 
 > **Note**: A comprehensive translation utility is planned for a future update to support multiple languages through a configuration file. 
