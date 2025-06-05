@@ -48,8 +48,8 @@ def get_physical_form_label(form):
     """Convert physical form code to readable label"""
     labels = {
         'gas': 'Gas',
-        'liquid': 'Liquido',
-        'liquidWithDip': 'Liquido con pescante'
+        'liquid': 'Liquid',
+        'liquidWithDip': 'Liquid with dip tube'
     }
     return labels.get(form, form)
 
@@ -91,36 +91,36 @@ def export_stock():
     data = request.json
     
     # Generate filename with timestamp
-    filename = f"stock_bombole_{generate_timestamp()}.csv"
+    filename = f"cylinder_stock_{generate_timestamp()}.csv"
     filepath = os.path.join(OUTPUT_DIR, filename)
     
     try:
         with open(filepath, 'w', newline='', encoding='utf-8') as csvfile:
-            fieldnames = ['Codice Bombola', 'Tipo Gas', 'Pressione (bar)', 
-                         'Volume Cilindro (L)', 'Forma Fisica', 'Data Ingresso']
+            fieldnames = ['Cylinder Code', 'Gas Type', 'Pressure (bar)', 
+                         'Cylinder Volume (L)', 'Physical Form', 'Entry Date']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             
             writer.writeheader()
             for cylinder in data:
                 writer.writerow({
-                    'Codice Bombola': cylinder['code'],
-                    'Tipo Gas': cylinder['gasType'],
-                    'Pressione (bar)': cylinder['pressure'],
-                    'Volume Cilindro (L)': cylinder.get('cylinderVolume', '50'),
-                    'Forma Fisica': get_physical_form_label(cylinder['physicalForm']),
-                    'Data Ingresso': format_date(cylinder['entryDate'])
+                    'Cylinder Code': cylinder['code'],
+                    'Gas Type': cylinder['gasType'],
+                    'Pressure (bar)': cylinder['pressure'],
+                    'Cylinder Volume (L)': cylinder.get('cylinderVolume', '50'),
+                    'Physical Form': get_physical_form_label(cylinder['physicalForm']),
+                    'Entry Date': format_date(cylinder['entryDate'])
                 })
                 
         return jsonify({
             'success': True,
-            'message': f'Stock esportato con successo in {filename}',
+            'message': f'Stock exported successfully to {filename}',
             'filepath': filepath
         })
     
     except Exception as e:
         return jsonify({
             'success': False,
-            'message': f'Errore durante l\'esportazione: {str(e)}'
+            'message': f'Error during export: {str(e)}'
         }), 500
 
 @app.route('/api/export-history', methods=['POST'])
@@ -129,14 +129,14 @@ def export_history():
     data = request.json
     
     # Generate filename with timestamp
-    filename = f"storico_bombole_{generate_timestamp()}.csv"
+    filename = f"cylinder_history_{generate_timestamp()}.csv"
     filepath = os.path.join(OUTPUT_DIR, filename)
     
     try:
         with open(filepath, 'w', newline='', encoding='utf-8') as csvfile:
-            fieldnames = ['Codice Bombola', 'Tipo Gas', 'Pressione Ingresso (bar)', 
-                         'Volume Cilindro (L)', 'Pressione Uscita (bar)', 'Data Ingresso', 'Data Uscita',
-                         'Consumo (bar)', 'Percentuale Consumo (%)', 'Consumo (L)']
+            fieldnames = ['Cylinder Code', 'Gas Type', 'Entry Pressure (bar)', 
+                         'Cylinder Volume (L)', 'Exit Pressure (bar)', 'Entry Date', 'Exit Date',
+                         'Consumption (bar)', 'Consumption (%)', 'Consumption (L)']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             
             writer.writeheader()
@@ -150,28 +150,28 @@ def export_history():
                 consumed_liters = (consumption * cylinderVolume)
                 
                 writer.writerow({
-                    'Codice Bombola': record['code'],
-                    'Tipo Gas': record['gasType'],
-                    'Pressione Ingresso (bar)': pressureIn,
-                    'Volume Cilindro (L)': cylinderVolume,
-                    'Pressione Uscita (bar)': pressureOut,
-                    'Data Ingresso': format_date(record['entryDate']),
-                    'Data Uscita': format_date(record['exitDate']),
-                    'Consumo (bar)': round(consumption, 2),
-                    'Percentuale Consumo (%)': round(consumption_percentage, 2),
-                    'Consumo (L)': round(consumed_liters, 2)
+                    'Cylinder Code': record['code'],
+                    'Gas Type': record['gasType'],
+                    'Entry Pressure (bar)': pressureIn,
+                    'Cylinder Volume (L)': cylinderVolume,
+                    'Exit Pressure (bar)': pressureOut,
+                    'Entry Date': format_date(record['entryDate']),
+                    'Exit Date': format_date(record['exitDate']),
+                    'Consumption (bar)': round(consumption, 2),
+                    'Consumption (%)': round(consumption_percentage, 2),
+                    'Consumption (L)': round(consumed_liters, 2)
                 })
                 
         return jsonify({
             'success': True,
-            'message': f'Storico esportato con successo in {filename}',
+            'message': f'History exported successfully to {filename}',
             'filepath': filepath
         })
     
     except Exception as e:
         return jsonify({
             'success': False,
-            'message': f'Errore durante l\'esportazione: {str(e)}'
+            'message': f'Error during export: {str(e)}'
         }), 500
 
 @app.route('/api/export-all', methods=['POST'])
@@ -182,7 +182,7 @@ def export_all():
     history = data.get('history', [])
     
     # Generate filename with timestamp
-    filename = f"report_completo_bombole_{generate_timestamp()}.csv"
+    filename = f"complete_cylinder_report_{generate_timestamp()}.csv"
     filepath = os.path.join(OUTPUT_DIR, filename)
     
     try:
@@ -190,14 +190,14 @@ def export_all():
             writer = csv.writer(csvfile)
             
             # Write report header
-            writer.writerow(['REPORT COMPLETO GESTIONE BOMBOLE'])
-            writer.writerow(['Data generazione:', datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")])
+            writer.writerow(['PRESSURE CYLINDER MANAGEMENT COMPLETE REPORT'])
+            writer.writerow(['Generation date:', datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")])
             writer.writerow([])
             
             # Write stock section
-            writer.writerow(['STOCK ATTUALE'])
-            writer.writerow(['Codice Bombola', 'Tipo Gas', 'Pressione (bar)', 
-                           'Volume Cilindro (L)', 'Forma Fisica', 'Data Ingresso'])
+            writer.writerow(['CURRENT STOCK'])
+            writer.writerow(['Cylinder Code', 'Gas Type', 'Pressure (bar)', 
+                           'Cylinder Volume (L)', 'Physical Form', 'Entry Date'])
             
             for cylinder in stock:
                 writer.writerow([
@@ -210,7 +210,7 @@ def export_all():
                 ])
             
             writer.writerow([])
-            writer.writerow(['Totale bombole in stock:', len(stock)])
+            writer.writerow(['Total cylinders in stock:', len(stock)])
             
             # Gas type summary
             gas_types = {}
@@ -222,18 +222,18 @@ def export_all():
                     gas_types[gas] = 1
             
             writer.writerow([])
-            writer.writerow(['RIEPILOGO PER TIPO DI GAS'])
-            writer.writerow(['Tipo Gas', 'Quantità'])
+            writer.writerow(['GAS TYPE SUMMARY'])
+            writer.writerow(['Gas Type', 'Quantity'])
             for gas, count in gas_types.items():
                 writer.writerow([gas, count])
             
             writer.writerow([])
             
             # Write history section
-            writer.writerow(['STORICO OPERAZIONI'])
-            writer.writerow(['Codice Bombola', 'Tipo Gas', 'Pressione Ingresso (bar)', 
-                           'Volume Cilindro (L)', 'Pressione Uscita (bar)', 'Data Ingresso', 'Data Uscita',
-                           'Consumo (bar)', 'Percentuale Consumo (%)', 'Consumo (L)'])
+            writer.writerow(['OPERATION HISTORY'])
+            writer.writerow(['Cylinder Code', 'Gas Type', 'Entry Pressure (bar)', 
+                           'Cylinder Volume (L)', 'Exit Pressure (bar)', 'Entry Date', 'Exit Date',
+                           'Consumption (bar)', 'Consumption (%)', 'Consumption (L)'])
             
             for record in history:
                 # Calculate consumption metrics
@@ -258,7 +258,7 @@ def export_all():
                 ])
             
             writer.writerow([])
-            writer.writerow(['Totale operazioni completate:', len(history)])
+            writer.writerow(['Total completed operations:', len(history)])
             
             # Consumption summary by gas type
             gas_consumption = {}  # Bar consumption
@@ -285,8 +285,8 @@ def export_all():
                     gas_volume_consumption[gas] = consumed_liters
             
             writer.writerow([])
-            writer.writerow(['RIEPILOGO CONSUMO PER TIPO DI GAS'])
-            writer.writerow(['Tipo Gas', 'Consumo Totale (bar)', 'Consumo Totale (L)'])
+            writer.writerow(['GAS CONSUMPTION SUMMARY'])
+            writer.writerow(['Gas Type', 'Total Consumption (bar)', 'Total Consumption (L)'])
             
             for gas in gas_consumption:
                 writer.writerow([
@@ -300,20 +300,20 @@ def export_all():
             total_liter_consumption = sum(gas_volume_consumption.values())
             
             writer.writerow([])
-            writer.writerow(['CONSUMO TOTALE', 
+            writer.writerow(['TOTAL CONSUMPTION', 
                            round(total_bar_consumption, 2), 
                            round(total_liter_consumption, 2)])
                 
         return jsonify({
             'success': True,
-            'message': f'Report completo generato con successo in {filename}',
+            'message': f'Complete report successfully generated in {filename}',
             'filepath': filepath
         })
     
     except Exception as e:
         return jsonify({
             'success': False,
-            'message': f'Errore durante la generazione del report: {str(e)}'
+            'message': f'Error during report generation: {str(e)}'
         }), 500
 
 @app.route('/api/extract-localstorage', methods=['POST'])
@@ -479,13 +479,13 @@ if __name__ == '__main__':
     
     # Print startup message
     print("\n" + "="*80)
-    print(" RMIC - Gestione Bombole in Pressione - Server Report".center(80))
+    print(" RMIC - Pressure Cylinder Management - Report Server".center(80))
     print("="*80)
-    print(f" Server avviato: https://{local_ip}:8078/")
-    print(f" Accesso locale: https://127.0.0.1:8078/")
-    print(f" Directory report: {os.path.abspath(OUTPUT_DIR)}")
+    print(f" Server started: https://{local_ip}:8078/")
+    print(f" Local access: https://127.0.0.1:8078/")
+    print(f" Report directory: {os.path.abspath(OUTPUT_DIR)}")
     print("="*80)
-    print(" Per terminare premere CTRL+C")
+    print(" Press CTRL+C to terminate")
     print("="*80 + "\n")
     
     # Create SSL context

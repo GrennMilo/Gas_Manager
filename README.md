@@ -18,6 +18,7 @@ A comprehensive web application for tracking and managing pressurized gas cylind
 12. [Performance Optimization](#performance-optimization)
 13. [Future Roadmap](#future-roadmap)
 14. [License](#license)
+15. [Recent Updates](#recent-updates)
 
 ## Overview
 
@@ -767,4 +768,71 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE. 
+SOFTWARE.
+
+## Recent Updates
+
+### June 2025 Updates
+
+#### Enhanced Consumption Reporting
+
+The gas consumption calculation has been improved to provide more accurate volume metrics:
+
+- **Direct Volume Calculation**: Gas consumption is now calculated using the formula `consumed_liters = (pressure_difference * cylinder_volume)`, which directly measures the volume of gas consumed
+- **Improved Reporting**: The "RIEPILOGO CONSUMO PER TIPO DI GAS" (Gas Consumption Summary) section in reports now clearly displays both pressure consumption (bar) and volume consumption (liters)
+- **Total Consumption Metrics**: Reports now include totals for both pressure and volume consumption across all gas types
+
+#### Report Generation Improvements
+
+- **Comprehensive Reports**: The "Report Completo" (Complete Report) feature now generates more detailed analyses including stock status, gas type distribution, and consumption patterns
+- **CSV Format Optimization**: Improved CSV formatting for better compatibility with Excel and other data analysis tools
+- **Data Validation**: Enhanced validation of consumption calculations for more reliable reporting
+
+### English Translation Guide
+
+To translate the application interface and reporting to English, follow these steps:
+
+#### Translating the User Interface
+
+1. **HTML Translation**:
+   - Open `gas.html` and replace Italian text with English equivalents
+   - Translate button labels, form fields, and section headers
+   - Maintain all HTML attributes and structure
+
+2. **JavaScript Translation**:
+   - Open `gas_manager.js` and translate user-facing messages
+   - Update notification texts in the `showNotification` function calls
+   - Translate validation messages and alerts
+
+#### Translating Reports
+
+1. **Report Headers**:
+   - In `app.py`, find the `export_all`, `export_stock`, and `export_history` functions
+   - Translate CSV headers and section titles from Italian to English
+
+2. **Function Names**:
+   - Consider updating function names to reflect English terminology
+   - Update corresponding JavaScript function calls if necessary
+
+3. **Date Formatting**:
+   - The `format_date` function can be updated to use English date formatting if desired (MM/DD/YYYY instead of DD/MM/YYYY)
+
+#### Key Translation References
+
+| Italian Term | English Translation |
+|--------------|---------------------|
+| Bombole | Cylinders |
+| Storico | History |
+| Aggiungi a Stock | Add to Stock |
+| Restituisci | Return |
+| Codice Bombola | Cylinder Code |
+| Tipo Gas | Gas Type |
+| Pressione | Pressure |
+| Volume Cilindro | Cylinder Volume |
+| Forma Fisica | Physical Form |
+| Data Ingresso | Entry Date |
+| Data Uscita | Exit Date |
+| Consumo | Consumption |
+| Riepilogo | Summary |
+
+> **Note**: A comprehensive translation utility is planned for a future update to support multiple languages through a configuration file. 
