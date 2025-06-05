@@ -147,7 +147,7 @@ def export_history():
                 cylinderVolume = float(record.get('cylinderVolume', '50'))
                 consumption = pressureIn - pressureOut
                 consumption_percentage = (consumption / pressureIn * 100) if pressureIn > 0 else 0
-                consumed_liters = (consumption * cylinderVolume) / pressureIn if pressureIn > 0 else 0
+                consumed_liters = (consumption * cylinderVolume)
                 
                 writer.writerow({
                     'Codice Bombola': record['code'],
@@ -242,7 +242,7 @@ def export_all():
                 cylinderVolume = float(record.get('cylinderVolume', '50'))
                 consumption = pressureIn - pressureOut
                 consumption_percentage = (consumption / pressureIn * 100) if pressureIn > 0 else 0
-                consumed_liters = (consumption * cylinderVolume) / pressureIn if pressureIn > 0 else 0
+                consumed_liters = (consumption * cylinderVolume)
                 
                 writer.writerow([
                     record['code'],
@@ -261,15 +261,21 @@ def export_all():
             writer.writerow(['Totale operazioni completate:', len(history)])
             
             # Consumption summary by gas type
-            gas_consumption = {}
-            gas_volume_consumption = {}
+            gas_consumption = {}  # Bar consumption
+            gas_volume_consumption = {}  # Liter consumption
+            
             for record in history:
                 gas = record['gasType']
                 pressureIn = float(record['pressureIn'])
                 pressureOut = float(record['pressureOut'])
                 cylinderVolume = float(record.get('cylinderVolume', '50'))
+                
+                # Calculate consumption in bar
                 consumption = pressureIn - pressureOut
-                consumed_liters = (consumption * cylinderVolume) / pressureIn if pressureIn > 0 else 0
+                
+                # Calculate consumption in liters
+                # Formula: consumed_liters = (pressure_diff * cylinder_volume)
+                consumed_liters = (consumption * cylinderVolume)
                 
                 if gas in gas_consumption:
                     gas_consumption[gas] += consumption
@@ -281,14 +287,22 @@ def export_all():
             writer.writerow([])
             writer.writerow(['RIEPILOGO CONSUMO PER TIPO DI GAS'])
             writer.writerow(['Tipo Gas', 'Consumo Totale (bar)', 'Consumo Totale (L)'])
+            
             for gas in gas_consumption:
-                writer.writerow([gas, round(gas_consumption[gas], 2), round(gas_volume_consumption[gas], 2)])
+                writer.writerow([
+                    gas, 
+                    round(gas_consumption[gas], 2),
+                    round(gas_volume_consumption[gas], 2)
+                ])
                 
             # Add overall total consumption
             total_bar_consumption = sum(gas_consumption.values())
             total_liter_consumption = sum(gas_volume_consumption.values())
+            
             writer.writerow([])
-            writer.writerow(['CONSUMO TOTALE', round(total_bar_consumption, 2), round(total_liter_consumption, 2)])
+            writer.writerow(['CONSUMO TOTALE', 
+                           round(total_bar_consumption, 2), 
+                           round(total_liter_consumption, 2)])
                 
         return jsonify({
             'success': True,
