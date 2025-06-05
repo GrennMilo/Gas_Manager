@@ -39,11 +39,11 @@ const gasManager = {
                 // Remove automatic backup
                 // setInterval(() => this.backupToServer(), 5 * 60 * 1000);
                 
-                this.showNotification('Sistema inizializzato con successo', 'success');
+                this.showNotification('System successfully initialized', 'success');
             })
             .catch(error => {
                 console.error('Error initializing application:', error);
-                this.showNotification('Errore durante l\'inizializzazione. Utilizzando dati locali.', 'error');
+                this.showNotification('Error during initialization. Using local data.', 'error');
                 
                 // Fall back to localStorage if server load fails
                 this.loadFromLocalStorage();
@@ -89,10 +89,10 @@ const gasManager = {
             };
             
             console.log('Tesseract scheduler initialized');
-            this.showNotification('Sistema OCR inizializzato', 'success');
+            this.showNotification('OCR system initialized', 'success');
         } catch (err) {
             console.error('Failed to create Tesseract scheduler:', err);
-            this.showNotification('Impossibile inizializzare il sistema OCR', 'error');
+            this.showNotification('Unable to initialize OCR system', 'error');
         }
     },
     
@@ -191,7 +191,7 @@ const gasManager = {
         this.mainVideoStream = null;
         this.mainCameraActive = false;
         
-        document.getElementById('togglePreviewBtn').textContent = 'Abilita Fotocamera';
+        document.getElementById('togglePreviewBtn').textContent = 'Enable Camera';
     },
     
     // Initialize return camera
@@ -201,7 +201,7 @@ const gasManager = {
         this.returnVideoStream = null;
         this.returnCameraActive = false;
         
-        document.getElementById('returnTogglePreviewBtn').textContent = 'Abilita Fotocamera';
+        document.getElementById('returnTogglePreviewBtn').textContent = 'Enable Camera';
     },
     
     // Toggle main camera on/off
@@ -210,10 +210,10 @@ const gasManager = {
         
         if (this.mainCameraActive) {
             this.stopMainCamera();
-            toggleBtn.innerHTML = '<i class="fas fa-camera"></i> Abilita Fotocamera';
+            toggleBtn.innerHTML = '<i class="fas fa-camera"></i> Enable Camera';
         } else {
             this.startMainCamera();
-            toggleBtn.innerHTML = '<i class="fas fa-eye-slash"></i> Disabilita Fotocamera';
+            toggleBtn.innerHTML = '<i class="fas fa-eye-slash"></i> Disable Camera';
         }
     },
     
@@ -223,10 +223,10 @@ const gasManager = {
         
         if (this.returnCameraActive) {
             this.stopReturnCamera();
-            toggleBtn.innerHTML = '<i class="fas fa-camera"></i> Abilita Fotocamera';
+            toggleBtn.innerHTML = '<i class="fas fa-camera"></i> Enable Camera';
         } else {
             this.startReturnCamera();
-            toggleBtn.innerHTML = '<i class="fas fa-eye-slash"></i> Disabilita Fotocamera';
+            toggleBtn.innerHTML = '<i class="fas fa-eye-slash"></i> Disable Camera';
         }
     },
     
@@ -251,18 +251,18 @@ const gasManager = {
                         this.mainVideoElement.play();
                         this.mainCameraActive = true;
                         
-                        this.showNotification('Fotocamera principale attivata', 'success');
+                        this.showNotification('Main camera activated', 'success');
                     })
                     .catch(err => {
-                        console.error('Errore accesso alla fotocamera principale:', err);
-                        this.showNotification('Errore accesso alla fotocamera: ' + err.message, 'error');
+                        console.error('Error accessing main camera:', err);
+                        this.showNotification('Error accessing camera: ' + err.message, 'error');
                     });
             } catch (err) {
-                console.error('Errore fotocamera:', err);
-                this.showNotification('Errore fotocamera: ' + err.message, 'error');
+                console.error('Camera error:', err);
+                this.showNotification('Camera error: ' + err.message, 'error');
             }
         } else {
-            this.showNotification('Il tuo browser non supporta l\'accesso alla fotocamera', 'error');
+            this.showNotification('Your browser does not support camera access', 'error');
         }
     },
     
@@ -287,27 +287,27 @@ const gasManager = {
                         this.returnVideoElement.play();
                         this.returnCameraActive = true;
                         
-                        this.showNotification('Fotocamera restituzione attivata', 'success');
+                        this.showNotification('Return camera activated', 'success');
                     })
                     .catch(err => {
-                        console.error('Errore accesso alla fotocamera restituzione:', err);
-                        this.showNotification('Errore accesso alla fotocamera: ' + err.message, 'error');
+                        console.error('Error accessing return camera:', err);
+                        this.showNotification('Error accessing camera: ' + err.message, 'error');
                         
                         // Show specific instructions for common errors
                         if (err.name === 'NotAllowedError') {
-                            this.showNotification('Permesso fotocamera negato. Verifica le impostazioni del browser', 'error');
+                            this.showNotification('Camera permission denied. Check browser settings', 'error');
                         } else if (err.name === 'NotFoundError') {
-                            this.showNotification('Nessuna fotocamera trovata sul dispositivo', 'error');
+                            this.showNotification('No camera found on this device', 'error');
                         } else if (err.name === 'NotReadableError') {
-                            this.showNotification('La fotocamera è già in uso da un\'altra applicazione', 'error');
+                            this.showNotification('The camera is already in use by another application', 'error');
                         }
                     });
             } catch (err) {
-                console.error('Errore fotocamera:', err);
-                this.showNotification('Errore fotocamera: ' + err.message, 'error');
+                console.error('Camera error:', err);
+                this.showNotification('Camera error: ' + err.message, 'error');
             }
         } else {
-            this.showNotification('Il tuo browser non supporta l\'accesso alla fotocamera', 'error');
+            this.showNotification('Your browser does not support camera access', 'error');
         }
     },
     
@@ -340,7 +340,7 @@ const gasManager = {
     // Capture image from main camera
     captureImage: function() {
         if (!this.mainCameraActive) {
-            this.showNotification('Attiva prima la fotocamera', 'warning');
+            this.showNotification('Please activate the camera first', 'warning');
             return;
         }
         
@@ -368,7 +368,7 @@ const gasManager = {
     // Capture image from return camera
     captureReturnImage: function() {
         if (!this.returnCameraActive) {
-            this.showNotification('Attiva prima la fotocamera', 'warning');
+            this.showNotification('Please activate the camera first', 'warning');
             return;
         }
         
@@ -586,7 +586,7 @@ const gasManager = {
     // Batch processing of cylinders
     batchProcessCylinders: function(codes) {
         if (!codes || codes.length === 0) {
-            this.showNotification('Nessun codice bombola rilevato', 'warning');
+            this.showNotification('No cylinder codes detected', 'warning');
             return;
         }
         
@@ -598,7 +598,7 @@ const gasManager = {
             batchContainer.className = 'mt-3 p-3 border rounded bg-light';
             
             const heading = document.createElement('h5');
-            heading.textContent = 'Bombole Rilevate';
+            heading.textContent = 'Detected Cylinders';
             batchContainer.appendChild(heading);
             
             const formsContainer = document.getElementById('cylinderFormsContainer');
@@ -609,7 +609,7 @@ const gasManager = {
         } else {
             batchContainer.innerHTML = '';
             const heading = document.createElement('h5');
-            heading.textContent = 'Bombole Rilevate';
+            heading.textContent = 'Detected Cylinders';
             batchContainer.appendChild(heading);
         }
         
@@ -618,10 +618,10 @@ const gasManager = {
         stockSummary.className = 'mb-3 p-2 border-bottom';
         stockSummary.innerHTML = `
             <div class="d-flex justify-content-between align-items-center">
-                <h6 class="mb-0">Stock Attuale: ${this.cylinders.length} bombole</h6>
+                <h6 class="mb-0">Current Stock: ${this.cylinders.length} cylinders</h6>
                 <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" 
                         data-bs-target="#stockSummaryCollapse" aria-expanded="false" aria-controls="stockSummaryCollapse">
-                    <i class="fas fa-eye"></i> Mostra Stock
+                    <i class="fas fa-eye"></i> Show Stock
                 </button>
             </div>
             <div class="collapse mt-2" id="stockSummaryCollapse">
@@ -630,9 +630,9 @@ const gasManager = {
                         <table class="table table-sm table-hover">
                             <thead>
                                 <tr>
-                                    <th>Codice</th>
+                                    <th>Code</th>
                                     <th>Gas</th>
-                                    <th>Pressione</th>
+                                    <th>Pressure</th>
                                     <th>Volume</th>
                                 </tr>
                             </thead>
@@ -646,7 +646,7 @@ const gasManager = {
                                             <td>${cylinder.cylinderVolume || '50'} L</td>
                                         </tr>
                                     `).join('') : 
-                                    '<tr><td colspan="4" class="text-center">Nessuna bombola in stock</td></tr>'
+                                    '<tr><td colspan="4" class="text-center">No cylinders in stock</td></tr>'
                                 }
                             </tbody>
                         </table>
@@ -668,18 +668,18 @@ const gasManager = {
                 cylinderForm.innerHTML = `
                     <div class="alert alert-warning mb-2">
                         <i class="fas fa-exclamation-triangle me-2"></i>
-                        Bombola ${code} già presente in stock (${existingCylinder.gasType}, ${existingCylinder.pressure} bar)
+                        Cylinder ${code} already exists in stock (${existingCylinder.gasType}, ${existingCylinder.pressure} bar)
                     </div>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group mb-2">
-                                <label>Codice Bombola</label>
+                                <label>Cylinder Code</label>
                                 <input type="text" class="form-control batch-cylinder-code" value="${code}" readonly>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group mb-2">
-                                <label>Tipo Gas</label>
+                                <label>Gas Type</label>
                                 <select class="form-select batch-cylinder-gas" disabled>
                                     <option value="${existingCylinder.gasType}" selected>${existingCylinder.gasType}</option>
                                 </select>
@@ -689,13 +689,13 @@ const gasManager = {
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group mb-2">
-                                <label>Pressione (bar)</label>
+                                <label>Pressure (bar)</label>
                                 <input type="number" class="form-control batch-cylinder-pressure" value="${existingCylinder.pressure}" disabled>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group mb-2">
-                                <label>Volume Cilindro (L)</label>
+                                <label>Cylinder Volume (L)</label>
                                 <input type="number" class="form-control batch-cylinder-volume" value="${existingCylinder.cylinderVolume || '50'}" disabled>
                             </div>
                         </div>
@@ -703,7 +703,7 @@ const gasManager = {
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group mb-2">
-                                <label>Forma Fisica</label>
+                                <label>Physical Form</label>
                                 <select class="form-select batch-cylinder-form" disabled>
                                     <option value="${existingCylinder.physicalForm}" selected>${this.getPhysicalFormLabel(existingCylinder.physicalForm)}</option>
                                 </select>
@@ -713,7 +713,7 @@ const gasManager = {
                     <div class="form-check">
                         <input class="form-check-input batch-cylinder-include" type="checkbox" id="includeCylinder-${index}" disabled>
                         <label class="form-check-label text-muted" for="includeCylinder-${index}">
-                            Escluso automaticamente (duplicato)
+                            Automatically excluded (duplicate)
                         </label>
                     </div>
                 `;
@@ -721,20 +721,20 @@ const gasManager = {
                 cylinderForm.innerHTML = `
                     <div class="alert alert-success mb-2">
                         <i class="fas fa-check-circle me-2"></i>
-                        Nuova bombola - pronta per essere aggiunta
+                        New cylinder - ready to be added
                     </div>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group mb-2">
-                                <label>Codice Bombola</label>
+                                <label>Cylinder Code</label>
                                 <input type="text" class="form-control batch-cylinder-code" value="${code}" readonly>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group mb-2">
-                                <label>Tipo Gas</label>
+                                <label>Gas Type</label>
                                 <select class="form-select batch-cylinder-gas" required>
-                                    <option value="">Seleziona...</option>
+                                    <option value="">Select...</option>
                                     <option value="H2">H2</option>
                                     <option value="N2">N2</option>
                                     <option value="CO2">CO2</option>
@@ -744,7 +744,7 @@ const gasManager = {
                                     <option value="Air">Air</option>
                                     <option value="He">He</option>
                                     <option value="Mix">Mix</option>
-                                    <option value="other">Altro</option>
+                                    <option value="other">Other</option>
                                 </select>
                             </div>
                         </div>
@@ -752,13 +752,13 @@ const gasManager = {
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group mb-2">
-                                <label>Pressione (bar)</label>
+                                <label>Pressure (bar)</label>
                                 <input type="number" class="form-control batch-cylinder-pressure" value="200" min="0" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group mb-2">
-                                <label>Volume Cilindro (L)</label>
+                                <label>Cylinder Volume (L)</label>
                                 <input type="number" class="form-control batch-cylinder-volume" value="50" min="0" required>
                             </div>
                         </div>
@@ -766,11 +766,11 @@ const gasManager = {
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group mb-2">
-                                <label>Forma Fisica</label>
+                                <label>Physical Form</label>
                                 <select class="form-select batch-cylinder-form" required>
                                     <option value="gas" selected>Gas</option>
-                                    <option value="liquid">Liquido</option>
-                                    <option value="liquidWithDip">Liquido con pescante</option>
+                                    <option value="liquid">Liquid</option>
+                                    <option value="liquidWithDip">Liquid with dip tube</option>
                                 </select>
                             </div>
                         </div>
@@ -778,7 +778,7 @@ const gasManager = {
                     <div class="form-check">
                         <input class="form-check-input batch-cylinder-include" type="checkbox" id="includeCylinder-${index}" checked>
                         <label class="form-check-label" for="includeCylinder-${index}">
-                            Includi nell'aggiunta
+                            Include in addition
                         </label>
                     </div>
                 `;
@@ -794,10 +794,10 @@ const gasManager = {
         // Add button to add all cylinders
         const addAllButton = document.createElement('button');
         addAllButton.className = 'btn btn-success w-100';
-        addAllButton.innerHTML = `<i class="fas fa-plus-circle me-2"></i>Aggiungi ${newCount} Bombole Nuove`;
+        addAllButton.innerHTML = `<i class="fas fa-plus-circle me-2"></i>Add ${newCount} New Cylinders`;
         if (newCount === 0) {
             addAllButton.disabled = true;
-            addAllButton.innerHTML = '<i class="fas fa-ban me-2"></i>Tutte le bombole sono già in stock';
+            addAllButton.innerHTML = '<i class="fas fa-ban me-2"></i>All cylinders are already in stock';
         }
         addAllButton.onclick = () => this.addBatchCylinders();
         
@@ -807,11 +807,11 @@ const gasManager = {
         const summaryDiv = document.createElement('div');
         summaryDiv.className = 'mt-2 text-center text-muted small';
         summaryDiv.innerHTML = `
-            <p>Rilevate ${codes.length} bombole: ${newCount} nuove, ${duplicateCount} già in stock</p>
+            <p>Detected ${codes.length} cylinders: ${newCount} new, ${duplicateCount} already in stock</p>
         `;
         batchContainer.appendChild(summaryDiv);
         
-        this.showNotification(`Rilevate ${codes.length} bombole (${newCount} nuove, ${duplicateCount} duplicate)`, 'success');
+        this.showNotification(`Detected ${codes.length} cylinders (${newCount} new, ${duplicateCount} duplicates)`, 'success');
     },
     
     // Add all cylinders from batch processing
@@ -846,7 +846,7 @@ const gasManager = {
             
             // Double-check if cylinder already exists (in case the UI wasn't updated)
             if (this.cylinders.some(c => c.code === code)) {
-                this.showNotification(`Bombola ${code} già presente in stock`, 'warning');
+                this.showNotification(`Cylinder ${code} already exists in stock`, 'warning');
                 skippedCount++;
                 return; // Skip duplicates
             }
@@ -877,26 +877,26 @@ const gasManager = {
             // Clear the batch container
             container.innerHTML = '';
             
-            this.showNotification(`Aggiunte ${addedCount} bombole con successo`, 'success');
+            this.showNotification(`Added ${addedCount} cylinders successfully`, 'success');
             
             // Don't automatically backup to server anymore
             // this.backupToServer();
         } else {
             if (skippedCount > 0) {
-                this.showNotification(`Nessuna bombola aggiunta, ${skippedCount} non valide o duplicate`, 'warning');
+                this.showNotification(`No cylinders added, ${skippedCount} invalid or duplicates`, 'warning');
             } else {
-                this.showNotification('Nessuna bombola aggiunta, verificare i dati inseriti', 'warning');
+                this.showNotification('No cylinders added, please check the data entered', 'warning');
             }
         }
     },
     
     // Process captured image with OCR
     processImage: function(imageDataUrl) {
-        this.showNotification('Immagine acquisita, elaborazione OCR in corso...', 'info');
+        this.showNotification('Image captured, OCR processing in progress...', 'info');
         
         // Check if Tesseract is initialized
         if (!this.tesseractScheduler) {
-            this.showNotification('Sistema OCR non inizializzato, riprovare', 'error');
+            this.showNotification('OCR system not initialized, please try again', 'error');
             return;
         }
         
@@ -938,7 +938,7 @@ const gasManager = {
                                 document.getElementById('gasType').value = gasMatch[0].toUpperCase();
                             }
                             
-                            this.showNotification(`Codice bombola rilevato: ${validCylinderCodes[0]}`, 'success');
+                            this.showNotification(`Cylinder code detected: ${validCylinderCodes[0]}`, 'success');
                         } else {
                             // Multiple codes - use batch processing
                             this.batchProcessCylinders(validCylinderCodes);
@@ -954,28 +954,28 @@ const gasManager = {
                                 if (originalValidCodes && originalValidCodes.length > 0) {
                                     if (originalValidCodes.length === 1) {
                                         document.getElementById('cylinderCode').value = originalValidCodes[0];
-                                        this.showNotification(`Codice bombola rilevato: ${originalValidCodes[0]}`, 'success');
+                                        this.showNotification(`Cylinder code detected: ${originalValidCodes[0]}`, 'success');
                                     } else {
                                         this.batchProcessCylinders(originalValidCodes);
                                     }
                                 } else {
-                                    this.showNotification('Nessun codice bombola rilevato, inserire manualmente', 'warning');
+                                    this.showNotification('No cylinder code detected, please enter manually', 'warning');
                                 }
                             })
                             .catch(err => {
                                 console.error('Original Image OCR Error:', err);
-                                this.showNotification('Nessun codice bombola rilevato, inserire manualmente', 'warning');
+                                this.showNotification('No cylinder code detected, please enter manually', 'warning');
                             });
                     }
                     
                 }).catch(err => {
                     console.error('OCR Error:', err);
-                    this.showNotification('Errore durante l\'elaborazione OCR: ' + err.message, 'error');
+                    this.showNotification('Error during OCR processing: ' + err.message, 'error');
                 });
             })
             .catch(err => {
                 console.error('Image Preprocessing Error:', err);
-                this.showNotification('Errore durante il preprocessing dell\'immagine', 'error');
+                this.showNotification('Error during image preprocessing', 'error');
                 
                 // Fallback to original image if preprocessing fails
                 this.tesseractScheduler.addJob('recognize', imageDataUrl)
@@ -987,16 +987,16 @@ const gasManager = {
                         if (validCodes && validCodes.length > 0) {
                             if (validCodes.length === 1) {
                                 document.getElementById('cylinderCode').value = validCodes[0];
-                                this.showNotification(`Codice bombola rilevato: ${validCodes[0]}`, 'success');
+                                this.showNotification(`Cylinder code detected: ${validCodes[0]}`, 'success');
                             } else {
                                 this.batchProcessCylinders(validCodes);
                             }
                         } else {
-                            this.showNotification('Nessun codice bombola rilevato, inserire manualmente', 'warning');
+                            this.showNotification('No cylinder code detected, please enter manually', 'warning');
                         }
                     })
                     .catch(err => {
-                        this.showNotification('Errore durante l\'elaborazione OCR', 'error');
+                        this.showNotification('Error during OCR processing', 'error');
                     });
             });
     },
@@ -1428,13 +1428,13 @@ const gasManager = {
         
         // Validate input
         if (!code || !gasType || !pressure || !cylinderVolume) {
-            this.showNotification('Compila tutti i campi richiesti', 'error');
+            this.showNotification('Please fill in all required fields', 'error');
             return;
         }
         
         // Check if cylinder already exists
         if (this.cylinders.some(c => c.code === code)) {
-            this.showNotification('Bombola già presente in stock', 'error');
+            this.showNotification('Cylinder already exists in stock', 'error');
             return;
         }
         
@@ -1461,7 +1461,7 @@ const gasManager = {
         // Reset form
         document.getElementById('cylinderForm').reset();
         
-        this.showNotification('Bombola aggiunta con successo', 'success');
+        this.showNotification('Cylinder added successfully', 'success');
         
         // Removed automatic backup to server
         // this.backupToServer();
@@ -1474,7 +1474,7 @@ const gasManager = {
         
         // Validate input
         if (!code || pressureOut === '') {
-            this.showNotification('Compila tutti i campi richiesti', 'error');
+            this.showNotification('Please fill in all required fields', 'error');
             return;
         }
         
@@ -1482,7 +1482,7 @@ const gasManager = {
         const cylinderIndex = this.cylinders.findIndex(c => c.code === code);
         
         if (cylinderIndex === -1) {
-            this.showNotification('Bombola non trovata in stock', 'error');
+            this.showNotification('Cylinder not found in stock', 'error');
             return;
         }
         
@@ -1515,7 +1515,7 @@ const gasManager = {
         // Reset form
         document.getElementById('manualReturnForm').reset();
         
-        this.showNotification('Bombola restituita con successo', 'success');
+        this.showNotification('Cylinder returned successfully', 'success');
         
         // Removed automatic backup to server
         // this.backupToServer();
@@ -1526,7 +1526,7 @@ const gasManager = {
         const code = document.getElementById('manualReturnCode').value.trim();
         
         if (!code) {
-            this.showNotification('Inserisci un codice bombola', 'warning');
+            this.showNotification('Enter a cylinder code', 'warning');
             return;
         }
         
@@ -1537,12 +1537,12 @@ const gasManager = {
             document.getElementById('manualReturnGasType').value = cylinder.gasType;
             document.getElementById('manualReturnPressureIn').value = cylinder.pressure;
             document.getElementById('manualReturnVolume').value = cylinder.cylinderVolume || '50';
-            this.showNotification('Bombola trovata in stock', 'success');
+            this.showNotification('Cylinder found in stock', 'success');
         } else {
             document.getElementById('manualReturnGasType').value = '';
             document.getElementById('manualReturnPressureIn').value = '';
             document.getElementById('manualReturnVolume').value = '';
-            this.showNotification('Bombola non trovata in stock', 'error');
+            this.showNotification('Cylinder not found in stock', 'error');
         }
     },
     
@@ -1553,7 +1553,7 @@ const gasManager = {
         
         if (this.cylinders.length === 0) {
             const row = document.createElement('tr');
-            row.innerHTML = '<td colspan="7" class="text-center">Nessuna bombola in stock</td>';
+            row.innerHTML = '<td colspan="7" class="text-center">No cylinders in stock</td>';
             tableBody.appendChild(row);
             return;
         }
@@ -1561,7 +1561,7 @@ const gasManager = {
         this.cylinders.forEach(cylinder => {
             const row = document.createElement('tr');
             
-            const formattedDate = new Date(cylinder.entryDate).toLocaleDateString('it-IT');
+            const formattedDate = new Date(cylinder.entryDate).toLocaleDateString('en-US');
             const physicalFormLabel = this.getPhysicalFormLabel(cylinder.physicalForm);
             
             row.innerHTML = `
@@ -1573,7 +1573,7 @@ const gasManager = {
                 <td>${formattedDate}</td>
                 <td>
                     <button class="btn btn-sm btn-danger" onclick="gasManager.returnCylinder('${cylinder.code}')">
-                        <i class="fas fa-undo"></i> Restituisci
+                        <i class="fas fa-undo"></i> Return
                     </button>
                 </td>
             `;
@@ -1587,7 +1587,7 @@ const gasManager = {
         const cylinder = this.cylinders.find(c => c.code === code);
         
         if (!cylinder) {
-            this.showNotification('Bombola non trovata in stock', 'error');
+            this.showNotification('Cylinder not found in stock', 'error');
             return;
         }
         
@@ -1601,7 +1601,7 @@ const gasManager = {
         // Scroll to return section
         document.querySelector('.section-card:nth-child(3)').scrollIntoView({ behavior: 'smooth' });
         
-        this.showNotification('Compila la pressione residua e conferma la restituzione', 'info');
+        this.showNotification('Enter residual pressure and confirm return', 'info');
     },
     
     // Render history table
@@ -1611,7 +1611,7 @@ const gasManager = {
         
         if (this.history.length === 0) {
             const row = document.createElement('tr');
-            row.innerHTML = '<td colspan="7" class="text-center">Nessun record nello storico</td>';
+            row.innerHTML = '<td colspan="7" class="text-center">No records in history</td>';
             tableBody.appendChild(row);
             return;
         }
@@ -1619,8 +1619,8 @@ const gasManager = {
         this.history.forEach(record => {
             const row = document.createElement('tr');
             
-            const entryDate = new Date(record.entryDate).toLocaleDateString('it-IT');
-            const exitDate = new Date(record.exitDate).toLocaleDateString('it-IT');
+            const entryDate = new Date(record.entryDate).toLocaleDateString('en-US');
+            const exitDate = new Date(record.exitDate).toLocaleDateString('en-US');
             
             row.innerHTML = `
                 <td>${record.code}</td>
@@ -1643,7 +1643,7 @@ const gasManager = {
         
         // Stock gas filter
         const stockGasFilter = document.getElementById('stockGasFilter');
-        stockGasFilter.innerHTML = '<option value="">Tutti</option>';
+        stockGasFilter.innerHTML = '<option value="">All</option>';
         
         gasTypes.forEach(gas => {
             if (gas) {
@@ -1657,7 +1657,7 @@ const gasManager = {
         // History gas filter
         const historyGasTypes = [...new Set(this.history.map(h => h.gasType))];
         const historyGasFilter = document.getElementById('historyGasFilter');
-        historyGasFilter.innerHTML = '<option value="">Tutti</option>';
+        historyGasFilter.innerHTML = '<option value="">All</option>';
         
         historyGasTypes.forEach(gas => {
             if (gas) {
@@ -1672,19 +1672,19 @@ const gasManager = {
     // Apply stock filters
     applyStockFilters: function() {
         this.renderStockTable();
-        this.showNotification('Filtri applicati', 'info');
+        this.showNotification('Filters applied', 'info');
     },
     
     // Apply history filters
     applyHistoryFilters: function() {
         this.renderHistoryTable();
-        this.showNotification('Filtri applicati', 'info');
+        this.showNotification('Filters applied', 'info');
     },
     
     // Export stock to CSV
     exportStock: function() {
         if (this.cylinders.length === 0) {
-            this.showNotification('Nessun dato da esportare', 'warning');
+            this.showNotification('No data to export', 'warning');
             return;
         }
         
@@ -1706,15 +1706,15 @@ const gasManager = {
             }
         })
         .catch(error => {
-            console.error('Errore esportazione:', error);
-            this.showNotification('Errore durante l\'esportazione', 'error');
+            console.error('Export error:', error);
+            this.showNotification('Error during export', 'error');
         });
     },
     
     // Export history to CSV
     exportHistory: function() {
         if (this.history.length === 0) {
-            this.showNotification('Nessun dato da esportare', 'warning');
+            this.showNotification('No data to export', 'warning');
             return;
         }
         
@@ -1736,15 +1736,15 @@ const gasManager = {
             }
         })
         .catch(error => {
-            console.error('Errore esportazione:', error);
-            this.showNotification('Errore durante l\'esportazione', 'error');
+            console.error('Export error:', error);
+            this.showNotification('Error during export', 'error');
         });
     },
     
     // Export all data to CSV
     exportAll: function() {
         if (this.cylinders.length === 0 && this.history.length === 0) {
-            this.showNotification('Nessun dato da esportare', 'warning');
+            this.showNotification('No data to export', 'warning');
             return;
         }
         
@@ -1769,8 +1769,8 @@ const gasManager = {
             }
         })
         .catch(error => {
-            console.error('Errore esportazione:', error);
-            this.showNotification('Errore durante l\'esportazione', 'error');
+            console.error('Export error:', error);
+            this.showNotification('Error during export', 'error');
         });
     },
     
@@ -1794,7 +1794,7 @@ const gasManager = {
             if (data.success) {
                 console.log('Backup completed:', data.message);
                 // Always show notification for all backups since auto-backup is disabled
-                this.showNotification('Salvataggio dati completato con successo', 'success');
+                this.showNotification('Data saved successfully', 'success');
                 return data;
             } else {
                 console.error('Backup failed:', data.message);
@@ -1803,8 +1803,8 @@ const gasManager = {
             }
         })
         .catch(error => {
-            console.error('Errore backup:', error);
-            this.showNotification('Errore durante il salvataggio', 'error');
+            console.error('Backup error:', error);
+            this.showNotification('Error during save', 'error');
             throw error;
         });
     },
@@ -1822,7 +1822,7 @@ const gasManager = {
     // Load available backups
     loadBackupsList: function() {
         const backupsList = document.getElementById('backupsList');
-        backupsList.innerHTML = '<tr><td colspan="5" class="text-center">Caricamento salvataggi...</td></tr>';
+        backupsList.innerHTML = '<tr><td colspan="5" class="text-center">Loading backups...</td></tr>';
         
         fetch('/api/list-backups')
             .then(response => response.json())
@@ -1839,7 +1839,7 @@ const gasManager = {
                                 <td>${backup.history_count}</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary" onclick="gasManager.loadBackup('${backup.filename}')">
-                                        <i class="fas fa-download me-1"></i>Carica
+                                        <i class="fas fa-download me-1"></i>Load
                                     </button>
                                 </td>
                             </tr>
@@ -1848,38 +1848,38 @@ const gasManager = {
                     
                     backupsList.innerHTML = html;
                 } else {
-                    backupsList.innerHTML = '<tr><td colspan="5" class="text-center">Nessun salvataggio disponibile</td></tr>';
+                    backupsList.innerHTML = '<tr><td colspan="5" class="text-center">No backups available</td></tr>';
                 }
             })
             .catch(error => {
                 console.error('Error loading backups:', error);
-                backupsList.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Errore durante il caricamento dei salvataggi</td></tr>';
+                backupsList.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error loading backups</td></tr>';
             });
     },
     
     // Create a new backup
     createBackup: function() {
-        this.showNotification('Salvataggio dati in corso...', 'info');
+        this.showNotification('Saving data...', 'info');
         
         this.backupToServer()
             .then(data => {
                 // Reload backups list
                 this.loadBackupsList();
-                this.showNotification('Dati salvati con successo', 'success');
+                this.showNotification('Data saved successfully', 'success');
             })
             .catch(error => {
                 console.error('Error creating backup:', error);
-                this.showNotification('Errore durante il salvataggio', 'error');
+                this.showNotification('Error during save', 'error');
             });
     },
     
     // Load a specific backup
     loadBackup: function(filename) {
-        if (!confirm(`Sei sicuro di voler caricare il salvataggio ${filename}?\nQuesto sostituirà tutti i dati attuali.`)) {
+        if (!confirm(`Are you sure you want to load backup ${filename}?\nThis will replace all current data.`)) {
             return;
         }
         
-        this.showNotification(`Caricamento salvataggio ${filename} in corso...`, 'info');
+        this.showNotification(`Loading backup ${filename}...`, 'info');
         
         fetch(`/api/load-backup/${filename}`)
             .then(response => response.json())
@@ -1898,7 +1898,7 @@ const gasManager = {
                     this.renderHistoryTable();
                     
                     // Update data source info
-                    this.updateDataSourceInfo(`Dati caricati da ${filename}`);
+                    this.updateDataSourceInfo(`Data loaded from ${filename}`);
                     
                     this.showNotification(result.message, 'success');
                     
@@ -1913,7 +1913,7 @@ const gasManager = {
             })
             .catch(error => {
                 console.error('Error loading backup:', error);
-                this.showNotification('Errore durante il caricamento del salvataggio', 'error');
+                this.showNotification('Error loading backup', 'error');
             });
     },
     

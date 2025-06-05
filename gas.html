@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestione Bombole </title>
+    <title>Pressure Cylinder Management</title>
     <link rel="stylesheet" href="css/styles.css">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -157,20 +157,20 @@
                 const warning = document.createElement('div');
                 warning.id = 'certWarning';
                 warning.innerHTML = `
-                    <strong>⚠️ Attenzione: Certificato di Sicurezza ⚠️</strong>
-                    <p>Per utilizzare la fotocamera, è necessario approvare il certificato di sicurezza autofirmato.</p>
+                    <strong>⚠️ Warning: Security Certificate ⚠️</strong>
+                    <p>To use the camera, you need to approve the self-signed security certificate.</p>
                     
                     <div class="cert-instructions">
-                        <h5>Come accettare il certificato:</h5>
+                        <h5>How to accept the certificate:</h5>
                         <ol>
-                            <li>Se vedi un messaggio di errore come "Il sito non può fornire una connessione protetta", fai clic su "Avanzate" o "Dettagli"</li>
-                            <li>Poi clicca su "Procedi su [sito]" o "Accetta il rischio e continua"</li>
-                            <li>Dovrai farlo solo una volta per sessione di navigazione</li>
-                            <li>Assicurati di usare <strong>https://</strong> nell'URL (non http://)</li>
+                            <li>If you see an error message like "The site cannot provide a secure connection", click on "Advanced" or "Details"</li>
+                            <li>Then click on "Proceed to [site]" or "Accept the risk and continue"</li>
+                            <li>You'll only need to do this once per browsing session</li>
+                            <li>Make sure you're using <strong>https://</strong> in the URL (not http://)</li>
                         </ol>
                     </div>
                     
-                    <button class="btn btn-sm btn-danger mt-2" onclick="this.parentNode.style.display='none'">Chiudi questo messaggio</button>
+                    <button class="btn btn-sm btn-danger mt-2" onclick="this.parentNode.style.display='none'">Close this message</button>
                 `;
                 document.body.prepend(warning);
                 warning.style.display = 'block';
@@ -180,7 +180,7 @@
 </head>
 <body class="bg-light">
     <div class="container mt-4">
-        <h1 class="mb-4">Ingresso Bombole</h1>
+        <h1 class="mb-4">Cylinder Entry</h1>
 
         <div class="card section-card">
             <div class="card-body">
@@ -191,10 +191,10 @@
                             <canvas id="canvas" style="display: none;"></canvas>
                             <div class="scanner-controls">
                                 <button class="btn btn-secondary me-2" id="togglePreviewBtn">
-                                    <i class="fas fa-eye"></i> Mostra Preview
+                                    <i class="fas fa-eye"></i> Show Preview
                                 </button>
                                 <button class="btn btn-primary" id="captureBtn">
-                                    <i class="fas fa-camera me-2"></i>Cattura
+                                    <i class="fas fa-camera me-2"></i>Capture
                                 </button>
                             </div>
                             <div id="progressBar">
@@ -202,19 +202,19 @@
                             </div>
                         </div>
 
-                        <!-- Container per i form delle bombole -->
+                        <!-- Container for cylinder forms -->
                         <div id="cylinderFormsContainer"></div>
                     </div>
                     <div class="col-md-6">
                         <form id="cylinderForm">
                             <div class="mb-3">
-                                <label class="form-label" for="cylinderCode">Codice Bombola</label>
-                                <input type="text" class="form-control" id="cylinderCode" required placeholder="Inserisci il codice bombola" aria-label="Codice Bombola">
+                                <label class="form-label" for="cylinderCode">Cylinder Code</label>
+                                <input type="text" class="form-control" id="cylinderCode" required placeholder="Enter cylinder code" aria-label="Cylinder Code">
                             </div>
                             <div class="mb-3">
-                                <label class="form-label" for="gasType">Tipo di Gas</label>
-                                <select class="form-select" id="gasType" required aria-label="Seleziona tipo di gas" title="Tipo di gas">
-                                    <option value="">Seleziona...</option>
+                                <label class="form-label" for="gasType">Gas Type</label>
+                                <select class="form-select" id="gasType" required aria-label="Select gas type" title="Gas type">
+                                    <option value="">Select...</option>
                                     <option value="H2">H2</option>
                                     <option value="N2">N2</option>
                                     <option value="CO2">CO2</option>
@@ -224,27 +224,27 @@
                                     <option value="Air">Air</option>
                                     <option value="He">He</option>
                                     <option value="Mix">Mix</option>
-                                    <option value="other">Altro</option>
+                                    <option value="other">Other</option>
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label" for="pressure">Pressione (bar)</label>
-                                <input type="number" class="form-control" id="pressure" value="200" min="0" required placeholder="Inserisci la pressione in bar" aria-label="Pressione in bar">
+                                <label class="form-label" for="pressure">Pressure (bar)</label>
+                                <input type="number" class="form-control" id="pressure" value="200" min="0" required placeholder="Enter pressure in bar" aria-label="Pressure in bar">
                             </div>
                             <div class="mb-3">
-                                <label class="form-label" for="cylinderVolume">Volume Cilindro (L)</label>
-                                <input type="number" class="form-control" id="cylinderVolume" value="50" min="0" required placeholder="Inserisci il volume in litri" aria-label="Volume in litri">
+                                <label class="form-label" for="cylinderVolume">Cylinder Volume (L)</label>
+                                <input type="number" class="form-control" id="cylinderVolume" value="50" min="0" required placeholder="Enter volume in liters" aria-label="Volume in liters">
                             </div>
                             <div class="mb-3">
-                                <label class="form-label" for="physicalForm">Forma Fisica</label>
-                                <select class="form-select" id="physicalForm" required aria-label="Seleziona forma fisica" title="Forma fisica del gas">
+                                <label class="form-label" for="physicalForm">Physical Form</label>
+                                <select class="form-select" id="physicalForm" required aria-label="Select physical form" title="Physical form of gas">
                                     <option value="gas">Gas</option>
-                                    <option value="liquid">Liquido</option>
-                                    <option value="liquidWithDip">Liquido con pescante</option>
+                                    <option value="liquid">Liquid</option>
+                                    <option value="liquidWithDip">Liquid with dip tube</option>
                                 </select>
                             </div>
                             <button type="button" class="btn btn-success" onclick="gasManager.addCylinder()">
-                                <i class="fas fa-plus me-2"></i>Aggiungi a Stock
+                                <i class="fas fa-plus me-2"></i>Add to Stock
                             </button>
                         </form>
                     </div>
@@ -252,38 +252,38 @@
             </div>
         </div>
 
-        <!-- Sezione Stock -->
+        <!-- Stock Section -->
         <div class="card section-card">
             <div class="section-header">
                 <h3 class="card-title mb-3">
-                    <i class="fas fa-boxes text-primary me-2"></i>Stock Attuale
+                    <i class="fas fa-boxes text-primary me-2"></i>Current Stock
                 </h3>
                 <div class="row g-3">
                     <div class="col-md-3">
                         <div class="input-group">
                             <span class="input-group-text">Gas</span>
-                            <select class="form-select" id="stockGasFilter" aria-label="Filtra per tipo di gas" title="Filtra per tipo di gas">
-                                <option value="">Tutti</option>
+                            <select class="form-select" id="stockGasFilter" aria-label="Filter by gas type" title="Filter by gas type">
+                                <option value="">All</option>
                             </select>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="input-group">
-                            <span class="input-group-text">Forma</span>
-                            <select class="form-select" id="stockFormFilter" aria-label="Filtra per forma fisica" title="Filtra per forma fisica">
-                                <option value="">Tutte</option>
+                            <span class="input-group-text">Form</span>
+                            <select class="form-select" id="stockFormFilter" aria-label="Filter by physical form" title="Filter by physical form">
+                                <option value="">All</option>
                                 <option value="gas">Gas</option>
-                                <option value="liquid">Liquido</option>
-                                <option value="liquidWithDip">Con pescante</option>
+                                <option value="liquid">Liquid</option>
+                                <option value="liquidWithDip">With dip tube</option>
                             </select>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="input-group">
-                            <span class="input-group-text">Ordina</span>
-                            <select class="form-select" id="stockSort" aria-label="Ordina per" title="Ordina per">
-                                <option value="date">Data</option>
-                                <option value="code">Codice</option>
+                            <span class="input-group-text">Sort</span>
+                            <select class="form-select" id="stockSort" aria-label="Sort by" title="Sort by">
+                                <option value="date">Date</option>
+                                <option value="code">Code</option>
                                 <option value="gas">Gas</option>
                             </select>
                         </div>
@@ -291,12 +291,12 @@
                     <div class="col-md-3">
                         <div class="d-flex gap-2">
                             <button class="btn btn-primary flex-grow-1" onclick="gasManager.applyStockFilters()">
-                                <i class="fas fa-filter me-2"></i>Filtra
+                                <i class="fas fa-filter me-2"></i>Filter
                             </button>
-                            <button class="btn btn-success" onclick="gasManager.exportStock()" title="Esporta stock attuale">
+                            <button class="btn btn-success" onclick="gasManager.exportStock()" title="Export current stock">
                                 <i class="fas fa-file-export"></i>
                             </button>
-                            <button class="btn btn-info" onclick="gasManager.refreshFromServer()" title="Aggiorna dati dal server">
+                            <button class="btn btn-info" onclick="gasManager.refreshFromServer()" title="Refresh data from server">
                                 <i class="fas fa-sync-alt"></i>
                             </button>
                         </div>
@@ -312,28 +312,28 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Codice</th>
+                                <th>Code</th>
                                 <th>Gas</th>
-                                <th>Pressione (bar)</th>
+                                <th>Pressure (bar)</th>
                                 <th>Volume (L)</th>
-                                <th>Forma Fisica</th>
-                                <th>Data Ingresso</th>
-                                <th>Azioni</th>
+                                <th>Physical Form</th>
+                                <th>Entry Date</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="stockTable">
-                            <!-- Lo stock verrà inserito qui -->
+                            <!-- Stock will be inserted here -->
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- Sezione Uscita Bombole -->
+        <!-- Cylinder Return Section -->
         <div class="card section-card">
             <div class="section-header">
                 <h3 class="card-title mb-0">
-                    <i class="fas fa-sign-out-alt text-danger me-2"></i>Uscita Bombole
+                    <i class="fas fa-sign-out-alt text-danger me-2"></i>Cylinder Return
                 </h3>
             </div>
             <div class="card-body">
@@ -344,10 +344,10 @@
                             <canvas id="returnCanvas" style="display: none;"></canvas>
                             <div class="scanner-controls">
                                 <button class="btn btn-secondary me-2" id="returnTogglePreviewBtn">
-                                    <i class="fas fa-camera"></i> Abilita Fotocamera
+                                    <i class="fas fa-camera"></i> Enable Camera
                                 </button>
                                 <button class="btn btn-primary" id="returnCaptureBtn">
-                                    <i class="fas fa-camera me-2"></i>Cattura
+                                    <i class="fas fa-camera me-2"></i>Capture
                                 </button>
                             </div>
                             <div id="returnProgressBar">
@@ -355,48 +355,48 @@
                             </div>
                         </div>
 
-                        <!-- Container per i form di restituzione da OCR -->
+                        <!-- Container for return forms from OCR -->
                         <div id="returnFormsContainer"></div>
                     </div>
                     <div class="col-md-6">
-                        <!-- Form manuale per la restituzione -->
+                        <!-- Manual return form -->
                         <div class="card">
                             <div class="card-body">
-                                <h5 class="card-title">Restituzione Manuale</h5>
+                                <h5 class="card-title">Manual Return</h5>
                                 <form id="manualReturnForm">
                                     <div class="mb-3">
-                                        <label class="form-label" for="manualReturnCode">Codice Bombola</label>
+                                        <label class="form-label" for="manualReturnCode">Cylinder Code</label>
                                         <div class="input-group">
                                             <input type="text" class="form-control" id="manualReturnCode" required 
-                                                   placeholder="Inserisci il codice bombola" aria-label="Codice bombola">
+                                                   placeholder="Enter cylinder code" aria-label="Cylinder code">
                                             <button class="btn btn-outline-secondary" type="button" 
-                                                    onclick="gasManager.checkCylinderCode()" title="Cerca bombola">
+                                                    onclick="gasManager.checkCylinderCode()" title="Search cylinder">
                                                 <i class="fas fa-search"></i>
                                             </button>
                                         </div>
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label" for="manualReturnGasType">Tipo di Gas</label>
+                                        <label class="form-label" for="manualReturnGasType">Gas Type</label>
                                         <input type="text" class="form-control" id="manualReturnGasType" readonly
-                                              title="Tipo di gas" aria-label="Tipo di gas" placeholder="Tipo di gas">
+                                              title="Gas type" aria-label="Gas type" placeholder="Gas type">
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label" for="manualReturnPressureIn">Pressione Originale (bar)</label>
+                                        <label class="form-label" for="manualReturnPressureIn">Original Pressure (bar)</label>
                                         <input type="number" class="form-control" id="manualReturnPressureIn" readonly
-                                              title="Pressione originale" aria-label="Pressione originale" placeholder="Pressione originale">
+                                              title="Original pressure" aria-label="Original pressure" placeholder="Original pressure">
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label" for="manualReturnVolume">Volume Cilindro (L)</label>
+                                        <label class="form-label" for="manualReturnVolume">Cylinder Volume (L)</label>
                                         <input type="number" class="form-control" id="manualReturnVolume" readonly
-                                              title="Volume cilindro" aria-label="Volume cilindro" placeholder="Volume cilindro">
+                                              title="Cylinder volume" aria-label="Cylinder volume" placeholder="Cylinder volume">
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label" for="manualReturnPressureOut">Pressione Residua (bar)</label>
+                                        <label class="form-label" for="manualReturnPressureOut">Residual Pressure (bar)</label>
                                         <input type="number" class="form-control" id="manualReturnPressureOut" required 
-                                              min="0" value="0" title="Pressione residua" aria-label="Pressione residua" placeholder="Pressione residua">
+                                              min="0" value="0" title="Residual pressure" aria-label="Residual pressure" placeholder="Residual pressure">
                                     </div>
                                     <button type="button" class="btn btn-danger w-100" onclick="gasManager.returnCylinderManual()">
-                                        <i class="fas fa-undo me-2"></i>Restituisci Bombola
+                                        <i class="fas fa-undo me-2"></i>Return Cylinder
                                     </button>
                                 </form>
                             </div>
@@ -406,43 +406,43 @@
             </div>
         </div>
 
-        <!-- Sezione Storico -->
+        <!-- History Section -->
         <div class="card section-card">
             <div class="section-header">
                 <h3 class="card-title mb-3">
-                    <i class="fas fa-history text-info me-2"></i>Storico Operazioni
+                    <i class="fas fa-history text-info me-2"></i>Operation History
                 </h3>
                 <div class="row g-3">
                     <div class="col-md-3">
                         <div class="input-group">
-                            <span class="input-group-text">Data</span>
+                            <span class="input-group-text">Date</span>
                             <input type="date" class="form-control" id="historyDateFilter" 
-                                  aria-label="Filtra per data" title="Filtra per data" placeholder="Seleziona data">
+                                  aria-label="Filter by date" title="Filter by date" placeholder="Select date">
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="input-group">
                             <span class="input-group-text">Gas</span>
-                            <select class="form-select" id="historyGasFilter" aria-label="Filtra per gas" title="Filtra per gas">
-                                <option value="">Tutti</option>
+                            <select class="form-select" id="historyGasFilter" aria-label="Filter by gas" title="Filter by gas">
+                                <option value="">All</option>
                             </select>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="input-group">
-                            <span class="input-group-text">Ordina</span>
-                            <select class="form-select" id="historySort" aria-label="Ordina per" title="Ordina per">
-                                <option value="dateIn">Data Ingresso</option>
-                                <option value="dateOut">Data Uscita</option>
+                            <span class="input-group-text">Sort</span>
+                            <select class="form-select" id="historySort" aria-label="Sort by" title="Sort by">
+                                <option value="dateIn">Entry Date</option>
+                                <option value="dateOut">Exit Date</option>
                             </select>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="d-flex gap-2">
                             <button class="btn btn-primary flex-grow-1" onclick="gasManager.applyHistoryFilters()">
-                                <i class="fas fa-filter me-2"></i>Filtra
+                                <i class="fas fa-filter me-2"></i>Filter
                             </button>
-                            <button class="btn btn-success" onclick="gasManager.exportHistory()" title="Esporta storico">
+                            <button class="btn btn-success" onclick="gasManager.exportHistory()" title="Export history">
                                 <i class="fas fa-file-export"></i>
                             </button>
                         </div>
@@ -454,17 +454,17 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Codice</th>
+                                <th>Code</th>
                                 <th>Gas</th>
-                                <th>Pressione In</th>
+                                <th>Entry Pressure</th>
                                 <th>Volume (L)</th>
-                                <th>Pressione Out</th>
-                                <th>Data Ingresso</th>
-                                <th>Data Uscita</th>
+                                <th>Exit Pressure</th>
+                                <th>Entry Date</th>
+                                <th>Exit Date</th>
                             </tr>
                         </thead>
                         <tbody id="historyTable">
-                            <!-- Lo storico verrà inserito qui -->
+                            <!-- History will be inserted here -->
                         </tbody>
                     </table>
                 </div>
@@ -472,60 +472,60 @@
         </div>
     </div>
 
-    <!-- Aggiungi un nuovo pulsante per il report completo nella navbar -->
+    <!-- Add a new button for the complete report in the navbar -->
     <div class="fixed-bottom p-3 text-end">
         <div class="btn-group">
-            <button class="btn btn-primary" onclick="gasManager.exportAll()" title="Genera report completo">
-                <i class="fas fa-file-csv me-2"></i>Report Completo
+            <button class="btn btn-primary" onclick="gasManager.exportAll()" title="Generate complete report">
+                <i class="fas fa-file-csv me-2"></i>Complete Report
             </button>
-            <button class="btn btn-success" onclick="gasManager.createBackup()" title="Salva dati nel server">
-                <i class="fas fa-save me-2"></i>Salva
+            <button class="btn btn-success" onclick="gasManager.createBackup()" title="Save data to server">
+                <i class="fas fa-save me-2"></i>Save
             </button>
-            <button class="btn btn-secondary" onclick="gasManager.showBackupManager()" title="Gestione backup">
+            <button class="btn btn-secondary" onclick="gasManager.showBackupManager()" title="Backup management">
                 <i class="fas fa-cloud-upload-alt me-2"></i>Backup Manager
             </button>
-            <a href="/camera-test" class="btn btn-info" target="_blank" title="Strumento di diagnostica fotocamera">
-                <i class="fas fa-camera me-2"></i>Test Fotocamera
+            <a href="/camera-test" class="btn btn-info" target="_blank" title="Camera diagnostic tool">
+                <i class="fas fa-camera me-2"></i>Camera Test
             </a>
         </div>
     </div>
 
-    <!-- Modal per gestione backup -->
+    <!-- Modal for backup management -->
     <div class="modal fade" id="backupModal" tabindex="-1" aria-labelledby="backupModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="backupModalLabel">Gestione Backup e Salvataggi</h5>
+                    <h5 class="modal-title" id="backupModalLabel">Backup and Save Management</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="d-flex justify-content-between mb-3">
-                        <h6>Salvataggi disponibili</h6>
+                        <h6>Available backups</h6>
                         <button class="btn btn-sm btn-success" onclick="gasManager.createBackup()">
-                            <i class="fas fa-save me-1"></i>Crea nuovo salvataggio
+                            <i class="fas fa-save me-1"></i>Create new backup
                         </button>
                     </div>
                     <div class="table-responsive">
                         <table class="table table-hover table-sm">
                             <thead>
                                 <tr>
-                                    <th>Nome file</th>
-                                    <th>Data modifica</th>
-                                    <th>Bombole</th>
-                                    <th>Storico</th>
-                                    <th>Azioni</th>
+                                    <th>Filename</th>
+                                    <th>Modified date</th>
+                                    <th>Cylinders</th>
+                                    <th>History</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="backupsList">
                                 <tr>
-                                    <td colspan="5" class="text-center">Caricamento salvataggi...</td>
+                                    <td colspan="5" class="text-center">Loading backups...</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
